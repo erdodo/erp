@@ -74,10 +74,13 @@ export async function POST(req: NextRequest) {
             where: { module_action: { module: mod, action } },
             update: {},
             create: { module: mod, action, description: `${mod}:${action}` },
+            select: { id: true },
           });
-          await tx.rolePermission.create({
-            data: { roleId: adminRole.id, permissionId: perm.id },
-          });
+          if (perm.id) {
+            await tx.rolePermission.create({
+              data: { roleId: adminRole.id, permissionId: perm.id },
+            });
+          }
         }
       }
 
