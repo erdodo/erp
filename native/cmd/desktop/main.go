@@ -17,7 +17,7 @@ import (
 )
 
 const appTitle = "ERP"
-const defaultURL = "https://erp.vercel.app"
+const defaultURL = "https://erp-erdodos-projects.vercel.app"
 
 // splashHTML is injected before the app loads so there's no blank white flash.
 const splashHTML = `
