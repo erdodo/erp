@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { PRODUCTION_STATUSES } from "@/lib/production-types";
 import type { ProductionLine, ProductionMethod } from "@/lib/production-types";
+import QuickAddSelect from "@/components/ui/QuickAddSelect";
 
 export default function NewProductionOrderPage() {
   const router = useRouter();
