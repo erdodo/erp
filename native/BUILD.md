@@ -60,23 +60,6 @@ make windows
 # → dist/erp-windows-amd64.exe
 ```
 
-## Android
-
-```bash
-# gomobile kur
-go install golang.org/x/mobile/cmd/gomobile@latest
-go install golang.org/x/mobile/cmd/gobind@latest
-gomobile init   # Android SDK + NDK gerekli (ANDROID_HOME ayarlı olmalı)
-
-# AAR üret (Android Studio projesine kopyala)
-make android-aar
-# → android/erp.aar
-
-# AAR + APK (Gradle projesi android/ dizininde olmalı)
-make android
-# → android/app/build/outputs/apk/release/app-release.apk
-```
-
 ---
 
 ## Temizlik
@@ -90,15 +73,15 @@ make clean
 
 ## GitHub Actions — Otomatik Build
 
-`v*` etiketi push edildiğinde tüm platformlar otomatik derlenir:
+`main` branch'e her push'ta desktop platformlar otomatik derlenir:
 
 ```bash
-git tag v1.0.0
-git push origin v1.0.0
+git push origin main
 ```
 
-Artifaktlar GitHub Release sayfasında yayınlanır:
-- `erp-macos.dmg`
-- `ERP-x86_64.AppImage`
-- `erp-windows-amd64.exe`
-- `erp.aar` / `app-release.apk`
+Artifaktlar GitHub Release sayfasında yayınlanır (`v1.{run_number}`):
+- `erp-macos.dmg` (macOS universal binary)
+- `ERP-x86_64.AppImage` (Linux)
+- `erp-windows-amd64.exe` (Windows)
+
+**Not:** Android build gomobile NDK compatibility sorunları nedeniyle devre dışı bırakılmıştır. Android için manuel build gereklidir.

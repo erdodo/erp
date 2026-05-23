@@ -150,76 +150,9 @@ jobs:
           name: erp-windows
           path: native/dist/erp-windows-amd64.exe
 
-  # ─── Android: AAR via gomobile ────────────────────────────────────
-  build-android:
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-go@v5
-        with:
-          go-version: "1.22"
-          cache-dependency-path: native/go.sum
-
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "17"
-
-      - name: Install Android NDK
-        run: |
-          ANDROID_SDK="$HOME/android-sdk"
-          mkdir -p "$ANDROID_SDK/cmdline-tools"
-          wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O cmdtools.zip
-          unzip -q cmdtools.zip -d "$ANDROID_SDK/cmdline-tools"
-          mv "$ANDROID_SDK/cmdline-tools/cmdline-tools" "$ANDROID_SDK/cmdline-tools/latest"
-          export ANDROID_HOME="$ANDROID_SDK"
-          export PATH="$ANDROID_SDK/cmdline-tools/latest/bin:$PATH"
-          yes | sdkmanager --licenses > /dev/null 2>&1 || true
-          sdkmanager "ndk;25.2.9519653" "platforms;android-19" "platforms;android-33" "build-tools;33.0.2"
-          echo "ANDROID_HOME=$ANDROID_SDK" >> "$GITHUB_ENV"
-          echo "ANDROID_NDK_HOME=$ANDROID_SDK/ndk/25.2.9519653" >> "$GITHUB_ENV"
-          echo "$ANDROID_SDK/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
-
-      - name: Install gomobile
-        env:
-          ANDROID_NDK_HOME: /home/runner/android-sdk/ndk/25.2.9519653
-        run: |
-          go install golang.org/x/mobile/cmd/gomobile@latest
-          go install golang.org/x/mobile/cmd/gobind@latest
-          $(go env GOPATH)/bin/gomobile init
-
-      - name: Build AAR
-        working-directory: native
-        env:
-          ANDROID_NDK_HOME: /home/runner/android-sdk/ndk/25.2.9519653
-        run: |
-          $(go env GOPATH)/bin/gomobile bind \
-            -target android/arm64 \
-            -javapkg com.erp.app \
-            -o android/erp.aar \
-            ./cmd/android/binding
-
-      - name: Build APK
-        working-directory: native/android
-        run: |
-          if [ -f gradlew ]; then
-            chmod +x gradlew
-            ./gradlew assembleRelease
-          else
-            echo "No Gradle project — AAR artifact only"
-          fi
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: erp-android
-          path: |
-            native/android/erp.aar
-            native/android/app/build/outputs/apk/release/*.apk
-
   # ─── Release: auto-tag v1.{run_number} and publish ──────────────
   release:
-    needs: [build-macos, build-linux, build-windows, build-android]
+    needs: [build-macos, build-linux, build-windows]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -251,4 +184,3 @@ jobs:
             artifacts/erp-macos/erp-macos.dmg
             artifacts/erp-linux/ERP-x86_64.AppImage
             artifacts/erp-windows/erp-windows-amd64.exe
-            artifacts/erp-android/**
