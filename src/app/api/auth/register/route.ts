@@ -38,86 +38,104 @@ export async function POST(req: NextRequest) {
 
     const hashedPassword = await hash(data.password, 12);
 
-    const result = await prisma.$transaction(async (tx) => {
-      const tenant = await tx.tenant.create({
-        data: {
-          name: data.companyName,
-          slug,
-          currency: "TRY",
-          language: "tr",
-          isActive: true,
-          onboardingDone: false,
-        },
-      });
+    // Create permissions outside transaction (batch operation)
+    const permissionIds: Record<string, string> = {};
+    for (const mod of MODULES) {
+      for (const action of ACTIONS) {
+        const perm = await prisma.permission.upsert({
+          where: { module_action: { module: mod, action } },
+          update: {},
+          create: { module: mod, action, description: `${mod}:${action}` },
+          select: { id: true },
+        });
+        permissionIds[`${mod}:${action}`] = perm.id;
+      }
+    }
 
-      const adminRole = await tx.role.create({
-        data: {
-          tenantId: tenant.id,
-          name: "Yönetici",
-          description: "Tam yetkili yönetici rolü",
-          isDefault: false,
-        },
-      });
+    const result = await prisma.$transaction(
+      async (tx) => {
+        const tenant = await tx.tenant.create({
+          data: {
+            name: data.companyName,
+            slug,
+            currency: "TRY",
+            language: "tr",
+            isActive: true,
+            onboardingDone: false,
+          },
+        });
 
-      await tx.role.create({
-        data: {
-          tenantId: tenant.id,
-          name: "Kullanıcı",
-          description: "Standart kullanıcı rolü",
-          isDefault: true,
-        },
-      });
+        const adminRole = await tx.role.create({
+          data: {
+            tenantId: tenant.id,
+            name: "Yönetici",
+            description: "Tam yetkili yönetici rolü",
+            isDefault: false,
+          },
+        });
 
-      for (const mod of MODULES) {
-        for (const action of ACTIONS) {
-          const perm = await tx.permission.upsert({
-            where: { module_action: { module: mod, action } },
-            update: {},
-            create: { module: mod, action, description: `${mod}:${action}` },
-            select: { id: true },
-          });
-          if (perm.id) {
-            await tx.rolePermission.create({
-              data: { roleId: adminRole.id, permissionId: perm.id },
-            });
-          }
+        await tx.role.create({
+          data: {
+            tenantId: tenant.id,
+            name: "Kullanıcı",
+            description: "Standart kullanıcı rolü",
+            isDefault: true,
+          },
+        });
+
+        // Batch insert rolePermissions
+        const rolePermData = MODULES.flatMap((mod) =>
+          ACTIONS.map((action) => ({
+            roleId: adminRole.id,
+            permissionId: permissionIds[`${mod}:${action}`],
+          }))
+        );
+        if (rolePermData.length > 0) {
+          await tx.rolePermission.createMany({ data: rolePermData });
         }
-      }
 
-      const user = await tx.user.create({
-        data: {
-          name: data.name,
-          email: data.email,
-          password: hashedPassword,
+        const user = await tx.user.create({
+          data: {
+            name: data.name,
+            email: data.email,
+            password: hashedPassword,
+            tenantId: tenant.id,
+            isAdmin: true,
+            isActive: true,
+            roleId: adminRole.id,
+          },
+        });
+
+        // Batch insert tenantModules
+        const moduleData = MODULES.map((mod, i) => ({
           tenantId: tenant.id,
-          isAdmin: true,
-          isActive: true,
-          roleId: adminRole.id,
-        },
-      });
+          module: mod,
+          isActive: false,
+          sortOrder: i,
+        }));
+        await tx.tenantModule.createMany({ data: moduleData });
 
-      for (let i = 0; i < MODULES.length; i++) {
-        await tx.tenantModule.create({
-          data: { tenantId: tenant.id, module: MODULES[i]!, isActive: false, sortOrder: i },
-        });
-      }
+        // Batch insert quotas
+        const defaultQuotas = [
+          { resource: "employees", maxCount: 50 },
+          { resource: "customers", maxCount: 500 },
+          { resource: "projects", maxCount: 20 },
+          { resource: "sales", maxCount: 1000 },
+          { resource: "warehouses", maxCount: 5 },
+          { resource: "users", maxCount: 25 },
+        ];
+        const quotaData = defaultQuotas.map((q) => ({
+          tenantId: tenant.id,
+          ...q,
+          currentCount: 0,
+          isUnlimited: false,
+        }));
+        await tx.tenantQuota.createMany({ data: quotaData });
 
-      const defaultQuotas = [
-        { resource: "employees", maxCount: 50 },
-        { resource: "customers", maxCount: 500 },
-        { resource: "projects", maxCount: 20 },
-        { resource: "sales", maxCount: 1000 },
-        { resource: "warehouses", maxCount: 5 },
-        { resource: "users", maxCount: 25 },
-      ];
-      for (const quota of defaultQuotas) {
-        await tx.tenantQuota.create({
-          data: { tenantId: tenant.id, ...quota, currentCount: 0, isUnlimited: false },
-        });
-      }
-
-      return { user, tenant };
-    });
+        return { user, tenant };
+      },
+      { timeout: 30000 }
+    );
 
     return NextResponse.json({
       success: true,
