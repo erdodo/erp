@@ -1,0 +1,220 @@
+name: Native Builds
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+jobs:
+  # ─── macOS: ARM64 + Intel → Universal binary + DMG ───────────────
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+          cache-dependency-path: native/go.sum
+
+      - name: Build macOS universal binary
+        working-directory: native
+        run: |
+          mkdir -p dist
+          CGO_ENABLED=1 GOOS=darwin GOARCH=arm64 \
+            go build -ldflags="-s -w" -o dist/erp-macos-arm64 ./cmd/desktop
+          CGO_ENABLED=1 GOOS=darwin GOARCH=amd64 \
+            go build -ldflags="-s -w" -o dist/erp-macos-amd64 ./cmd/desktop
+          lipo -create -output dist/erp-macos-universal \
+            dist/erp-macos-arm64 dist/erp-macos-amd64
+
+      - name: Create .app bundle
+        working-directory: native
+        run: |
+          mkdir -p dist/ERP.app/Contents/MacOS
+          mkdir -p dist/ERP.app/Contents/Resources
+          cp dist/erp-macos-universal dist/ERP.app/Contents/MacOS/ERP
+          cat > dist/ERP.app/Contents/Info.plist <<'PLIST'
+          <?xml version="1.0"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>CFBundleName</key><string>ERP</string>
+            <key>CFBundleIdentifier</key><string>com.erp.app</string>
+            <key>CFBundleVersion</key><string>${{ github.ref_name }}</string>
+            <key>CFBundleExecutable</key><string>ERP</string>
+            <key>CFBundlePackageType</key><string>APPL</string>
+            <key>NSHighResolutionCapable</key><true/>
+          </dict></plist>
+          PLIST
+
+      - name: Create DMG
+        working-directory: native/dist
+        run: |
+          hdiutil create -volname "ERP" -srcfolder ERP.app \
+            -ov -format UDZO erp-macos.dmg
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: erp-macos
+          path: native/dist/erp-macos.dmg
+
+  # ─── Linux: x86_64 AppImage ──────────────────────────────────────
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+          cache-dependency-path: native/go.sum
+
+      - name: Install GTK + WebKit2 dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            libgtk-3-dev libwebkit2gtk-4.1-dev libglib2.0-dev \
+            fuse libfuse2
+
+      - name: Build Linux binary
+        working-directory: native
+        run: |
+          mkdir -p dist
+          CGO_ENABLED=1 GOOS=linux GOARCH=amd64 \
+            go build -ldflags="-s -w" -o dist/erp-linux-amd64 ./cmd/desktop
+
+      - name: Create AppImage
+        working-directory: native
+        run: |
+          mkdir -p AppDir/usr/bin AppDir/usr/lib AppDir/usr/share/applications AppDir/usr/share/icons/hicolor/256x256/apps
+          cp dist/erp-linux-amd64 AppDir/usr/bin/erp
+
+          cat > AppDir/erp.desktop <<'EOF'
+          [Desktop Entry]
+          Name=ERP
+          Exec=erp
+          Icon=erp
+          Type=Application
+          Categories=Office;
+          EOF
+
+          cat > AppDir/AppRun <<'EOF'
+          #!/bin/sh
+          exec "$(dirname "$0")/usr/bin/erp" "$@"
+          EOF
+          chmod +x AppDir/AppRun
+
+          # Placeholder icon (1x1 px PNG)
+          printf '\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x01\x00\x00\x00\x01\x00\x08\x02\x00\x00\x00\x90wS\xde\x00\x00\x00\x0cIDATx\x9cc\xf8\x0f\x00\x00\x01\x01\x00\x05\x18\xd4n\x00\x00\x00\x00IEND\xaeB`\x82' \
+            > AppDir/usr/share/icons/hicolor/256x256/apps/erp.png
+          cp AppDir/usr/share/icons/hicolor/256x256/apps/erp.png AppDir/erp.png
+
+          wget -q "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage" \
+            -O appimagetool && chmod +x appimagetool
+          ARCH=x86_64 ./appimagetool AppDir dist/ERP-x86_64.AppImage
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: erp-linux
+          path: native/dist/ERP-x86_64.AppImage
+
+  # ─── Windows: x86_64 EXE (cross-compile with mingw-w64) ──────────
+  build-windows:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+          cache-dependency-path: native/go.sum
+
+      - name: Install mingw-w64
+        run: sudo apt-get install -y --no-install-recommends gcc-mingw-w64-x86-64
+
+      - name: Build Windows binary
+        working-directory: native
+        run: |
+          mkdir -p dist
+          CGO_ENABLED=1 GOOS=windows GOARCH=amd64 \
+            CC=x86_64-w64-mingw32-gcc \
+            go build -ldflags="-s -w -H=windowsgui" \
+            -o dist/erp-windows-amd64.exe ./cmd/desktop
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: erp-windows
+          path: native/dist/erp-windows-amd64.exe
+
+  # ─── Android: APK via gomobile + Gradle ──────────────────────────
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+          cache-dependency-path: native/go.sum
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install gomobile
+        run: |
+          go install golang.org/x/mobile/cmd/gomobile@latest
+          go install golang.org/x/mobile/cmd/gobind@latest
+          $(go env GOPATH)/bin/gomobile init
+
+      - name: Build AAR
+        working-directory: native
+        run: |
+          $(go env GOPATH)/bin/gomobile bind \
+            -target android \
+            -javapkg com.erp.app \
+            -o android/erp.aar \
+            ./cmd/android/binding
+
+      - name: Build APK
+        working-directory: native/android
+        run: |
+          if [ -f gradlew ]; then
+            chmod +x gradlew
+            ./gradlew assembleRelease
+          else
+            echo "No Gradle project — AAR artifact only"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: erp-android
+          path: |
+            native/android/erp.aar
+            native/android/app/build/outputs/apk/release/*.apk
+
+  # ─── Release: attach all artifacts ───────────────────────────────
+  release:
+    needs: [build-macos, build-linux, build-windows, build-android]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            artifacts/erp-macos/erp-macos.dmg
+            artifacts/erp-linux/ERP-x86_64.AppImage
+            artifacts/erp-windows/erp-windows-amd64.exe
+            artifacts/erp-android/**

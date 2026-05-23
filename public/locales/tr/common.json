@@ -1,0 +1,213 @@
+{
+  "app": {
+    "name": "ERP Sistemi",
+    "loading": "Yükleniyor...",
+    "error": "Bir hata oluştu",
+    "save": "Kaydet",
+    "cancel": "İptal",
+    "delete": "Sil",
+    "edit": "Düzenle",
+    "add": "Ekle",
+    "view": "Görüntüle",
+    "close": "Kapat",
+    "confirm": "Onayla",
+    "search": "Ara...",
+    "filter": "Filtrele",
+    "export": "Dışa Aktar",
+    "import": "İçe Aktar",
+    "print": "Yazdır",
+    "refresh": "Yenile",
+    "back": "Geri",
+    "next": "İleri",
+    "submit": "Gönder",
+    "reset": "Sıfırla",
+    "required": "Zorunlu alan",
+    "optional": "İsteğe bağlı",
+    "yes": "Evet",
+    "no": "Hayır",
+    "active": "Aktif",
+    "passive": "Pasif",
+    "status": "Durum",
+    "date": "Tarih",
+    "actions": "İşlemler",
+    "total": "Toplam",
+    "of": "/{total}",
+    "rows": "satır",
+    "noData": "Kayıt bulunamadı",
+    "noResults": "Sonuç bulunamadı"
+  },
+  "auth": {
+    "login": "Giriş Yap",
+    "logout": "Çıkış Yap",
+    "register": "Kayıt Ol",
+    "email": "E-posta",
+    "password": "Şifre",
+    "confirmPassword": "Şifre Tekrar",
+    "name": "Ad Soyad",
+    "companyName": "Şirket Adı",
+    "forgotPassword": "Şifremi Unuttum",
+    "invalidCredentials": "Geçersiz e-posta veya şifre",
+    "emailRequired": "E-posta adresi zorunludur",
+    "passwordRequired": "Şifre zorunludur",
+    "passwordMinLength": "Şifre en az 8 karakter olmalıdır",
+    "passwordMismatch": "Şifreler eşleşmiyor",
+    "registrationSuccess": "Kayıt başarılı! Giriş yapabilirsiniz.",
+    "accountInactive": "Hesabınız aktif değil. Yöneticinize başvurun."
+  },
+  "modules": {
+    "dashboard": "Dashboard",
+    "crm": "CRM",
+    "sales": "Satış",
+    "retail": "Mağaza",
+    "virtualSales": "Sanal Satış",
+    "subscriptions": "Abonelik",
+    "production": "Üretim Takip",
+    "productionMethod": "Üretim Metot",
+    "fiveS": "5S Programı",
+    "quality": "Kalite PPM",
+    "equipment": "Ekipman",
+    "maintenance": "Bakım",
+    "stock": "Stok",
+    "inventory": "Envanter",
+    "materials": "Malzeme Kütüphanesi",
+    "employees": "Çalışanlar",
+    "recruitment": "İşe Alım",
+    "leave": "İzin",
+    "project": "Proje Yönetimi",
+    "tasks": "İş Takibi",
+    "processTracking": "Süreç Takibi",
+    "serviceRoutes": "Servis Güzergah",
+    "expenses": "Masraf",
+    "fleet": "Filo",
+    "fieldServices": "Saha Hizmetleri",
+    "rent": "Kira",
+    "iot": "IoT",
+    "notifications": "Bildirimler",
+    "settings": "Ayarlar",
+    "help": "Yardım"
+  },
+  "nav": {
+    "profile": "Profil",
+    "settings": "Ayarlar",
+    "logout": "Çıkış Yap",
+    "theme": "Tema",
+    "light": "Açık",
+    "dark": "Koyu",
+    "language": "Dil"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "addWidget": "Widget Ekle",
+    "editWidget": "Widget Düzenle",
+    "deleteWidget": "Widget Sil",
+    "noWidgets": "Henüz widget eklenmemiş. Başlamak için widget ekleyin.",
+    "widgetTypes": {
+      "stat": "İstatistik",
+      "chart": "Grafik",
+      "table": "Tablo",
+      "list": "Liste"
+    }
+  },
+  "crm": {
+    "title": "CRM",
+    "customers": "Müşteriler",
+    "newCustomer": "Yeni Müşteri",
+    "customerDetail": "Müşteri Detayı",
+    "pipeline": "Pipeline",
+    "contacts": "Kişiler",
+    "interactions": "Etkileşimler",
+    "customerType": {
+      "individual": "Bireysel",
+      "corporate": "Kurumsal"
+    },
+    "pipelineStage": {
+      "lead": "Potansiyel",
+      "prospect": "Aday",
+      "customer": "Müşteri",
+      "active": "Aktif"
+    }
+  },
+  "employees": {
+    "title": "Çalışanlar",
+    "newEmployee": "Yeni Çalışan",
+    "employeeDetail": "Çalışan Detayı",
+    "employeeId": "Sicil No",
+    "department": "Departman",
+    "position": "Pozisyon",
+    "salary": "Maaş",
+    "manager": "Yönetici",
+    "hireDate": "İşe Giriş Tarihi"
+  },
+  "leave": {
+    "title": "İzin Yönetimi",
+    "newRequest": "Yeni İzin Talebi",
+    "myRequests": "Taleplerim",
+    "teamRequests": "Ekip Talepleri",
+    "balance": "İzin Bakiyesi",
+    "types": {
+      "annual": "Yıllık İzin",
+      "sick": "Hastalık İzni",
+      "excused": "Mazeret İzni",
+      "unpaid": "Ücretsiz İzin"
+    },
+    "status": {
+      "pending": "Beklemede",
+      "approved": "Onaylandı",
+      "rejected": "Reddedildi",
+      "cancelled": "İptal Edildi"
+    }
+  },
+  "errors": {
+    "notFound": "Sayfa bulunamadı",
+    "unauthorized": "Bu sayfaya erişim yetkiniz yok",
+    "forbidden": "Bu işlem için yetkiniz bulunmuyor",
+    "serverError": "Sunucu hatası oluştu",
+    "moduleInactive": "Bu modül aktif değil",
+    "quotaExceeded": "Limitinize ulaştınız. Yöneticinize başvurun.",
+    "networkError": "Bağlantı hatası. Çevrimdışı modda çalışıyorsunuz."
+  },
+  "shortcuts": {
+    "hint": "Klavye Kısayolları",
+    "altKey": "Alt + ? kısayol listesini açar",
+    "modules": {
+      "crm": "C",
+      "sales": "S",
+      "production": "U",
+      "employees": "P",
+      "inventory": "E",
+      "dashboard": "H",
+      "notifications": "N",
+      "settings": "A"
+    },
+    "global": {
+      "commandPalette": "Alt + K",
+      "search": "Alt + /",
+      "toggleTheme": "Alt + D",
+      "newTab": "Alt + T",
+      "closeTab": "Alt + W"
+    },
+    "form": {
+      "submit": "Alt + Enter",
+      "cancel": "Escape"
+    }
+  },
+  "quota": {
+    "limitReached": "Limit doldu",
+    "remaining": "Kalan: {remaining}/{max}",
+    "unlimited": "Sınırsız"
+  },
+  "audit": {
+    "title": "Denetim Kaydı",
+    "action": "İşlem",
+    "module": "Modül",
+    "user": "Kullanıcı",
+    "date": "Tarih",
+    "actions": {
+      "create": "Oluşturuldu",
+      "update": "Güncellendi",
+      "delete": "Silindi",
+      "login": "Giriş yapıldı",
+      "export": "Dışa aktarıldı"
+    }
+  }
+}
