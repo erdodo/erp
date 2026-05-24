@@ -43,10 +43,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     onboardingChecked.current = true;
     const path = window.location.pathname;
     if (path.startsWith("/dashboard/onboarding")) return;
-    void fetch("/api/tenant/onboarding").then((r) => r.json()).then((d: { done: boolean }) => {
-      if (!d.done) router.replace("/dashboard/onboarding");
+    void fetch("/api/tenant/onboarding").then((r) => {
+      if (!r.ok) return; // Don't redirect on error
+      return r.json();
+    }).then((d: { done: boolean } | undefined) => {
+      if (d && !d.done) router.replace("/dashboard/onboarding");
+    }).catch(() => {
+      // Ignore fetch errors - don't redirect
     });
-  }, [status, session?.user?.tenantId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [status, session?.user?.tenantId, router]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
@@ -81,8 +86,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </main>
       </div>
 
-      <GlobalSearch />
+      {/* AI Chat */}
       <AiChat />
+      <GlobalSearch />
     </div>
   );
 }
