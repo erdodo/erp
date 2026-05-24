@@ -23,6 +23,8 @@ export async function proxy(request: NextRequest) {
   const token = await getToken({
     req: request,
     secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
+    cookieName: "next-auth.session-token",
+    secureCookie: process.env.NODE_ENV === "production",
   });
 
   const isAuthenticated = !!token;

@@ -31,21 +31,16 @@ export default function LoginPage() {
     setFormError(null);
 
     try {
-      const result = await signIn("credentials", {
+      await signIn("credentials", {
         email: email.trim(),
         password,
-        redirect: false,
+        callbackUrl,
+        redirect: true,
       });
-
-      if (result?.ok) {
-        router.push(callbackUrl);
-        router.refresh();
-      } else {
-        setFormError("E-posta veya şifre hatalı.");
-      }
     } catch (err) {
       console.error("[LOGIN] Error:", err);
       setFormError("Giriş sırasında bir hata oluştu. Lütfen tekrar deneyin.");
+    
     } finally {
       setLoading(false);
     }
