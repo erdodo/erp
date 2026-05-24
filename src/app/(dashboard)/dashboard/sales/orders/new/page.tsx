@@ -24,7 +24,14 @@ export default function NewOrderPage() {
   const [products,    setProducts]    = useState<SalesProduct[]>([]);
   const [stores,      setStores]      = useState<SimpleStore[]>([]);
   const [customerId,  setCustomerId]  = useState("");
-  const [storeId,     setStoreId]     = useState("");
+  const [storeId, setStoreId] = useState("");
+  const [salespersonId, setSalespersonId] = useState("");
+  const [salespeople, setSalespeople] = useState<[{id:string; name:string}]>([]);
+  const [channel, setChannel] = useState("virtual"); // "virtual" or "store"
+  const [maintenanceDate, setMaintenanceDate] = useState("");
+  const [maintenanceFee, setMaintenanceFee] = useState(0);
+  const [triggerProduction, setTriggerProduction] = useState(false);
+
   const [status,      setStatus]      = useState("draft");
   const [currency,    setCurrency]    = useState("TRY");
   const [discount,    setDiscount]    = useState(0);
@@ -54,6 +61,14 @@ export default function NewOrderPage() {
     void loadProducts();
     fetch("/api/modules/retail").then((r) => r.ok ? r.json() : { stores: [] }).then((d: { stores: SimpleStore[] }) => setStores(d.stores ?? []));
   }, [loadCustomers, loadProducts]);
+
+  useEffect(() => {
+    // Fetch salespeople for selection
+    fetch("/api/modules/users?role=salesperson")
+      .then((r) => r.json())
+      .then((data) => setSalespeople(data.salespeople ?? []))
+      .catch(() => {});
+  }, []);
 
   // Auto-apply discount based on customer type + quantity
   useEffect(() => {
@@ -101,14 +116,24 @@ export default function NewOrderPage() {
     setSaving(true); setError("");
     const payload = {
       customerId: customerId || undefined,
-      retailStoreId: storeId || undefined,
-      status, currency, discount, tax,
+      retailStoreId: channel === "store" ? storeId || undefined : undefined,
+      channel,
+      salespersonId: salespersonId || undefined,
+      maintenanceDate: maintenanceDate || undefined,
+      maintenanceFee: maintenanceFee || undefined,
+      triggerProduction,
+      status,
+      currency,
+      discount,
+      tax,
       notes: notes || undefined,
       deliveryDate: deliveryDate || undefined,
       items: items.map((i) => ({
         stockItemId: i.stockItemId || undefined,
-        name: i.name, quantity: i.quantity,
-        unit: i.unit, unitPrice: i.unitPrice,
+        name: i.name,
+        quantity: i.quantity,
+        unit: i.unit,
+        unitPrice: i.unitPrice,
       })),
     };
     const r = await fetch("/api/modules/sales/orders", {
@@ -135,50 +160,61 @@ export default function NewOrderPage() {
         <div className="rounded-2xl border border-border bg-white dark:bg-slate-900 p-5">
           <h2 className="font-semibold text-foreground mb-4">Sipariş Bilgileri</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            <div className="md:col-span-2">
-              <label className="block text-xs font-medium text-slate-500 mb-1">Müşteri</label>
-              <select value={customerId} onChange={(e) => setCustomerId(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-border bg-white dark:bg-slate-900 text-foreground text-sm focus:outline-none cursor-pointer">
-                <option value="">— Müşteri seçin (opsiyonel) —</option>
-                {customers.map((c) => <option key={c.id} value={c.id}>{c.name} ({c.type === "corporate" ? "Kurumsal" : "Bireysel"})</option>)}
-              </select>
-              {selectedCustomer && (
-                <p className="mt-1 text-xs text-slate-400">
-                  {selectedCustomer.type === "corporate" ? "🏢 B2B — kurumsal iskonto otomatik uygulanır" : "👤 Bireysel müşteri"}
-                </p>
-              )}
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-500 mb-1">Durum</label>
-              <select value={status} onChange={(e) => setStatus(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-border bg-white dark:bg-slate-900 text-foreground text-sm focus:outline-none cursor-pointer">
-                {ORDER_STATUSES.filter((s) => ["draft","quote","pending_approval"].includes(s.id)).map((s) =>
-                  <option key={s.id} value={s.id}>{s.label}</option>
-                )}
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-500 mb-1">Para Birimi</label>
-              <select value={currency} onChange={(e) => setCurrency(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-border bg-white dark:bg-slate-900 text-foreground text-sm focus:outline-none cursor-pointer">
-                {["TRY","USD","EUR","GBP","AED"].map((c) => <option key={c} value={c}>{c}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-500 mb-1">Teslimat Tarihi</label>
-              <input type="date" value={deliveryDate} onChange={(e) => setDeliveryDate(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-border bg-white dark:bg-slate-900 text-foreground text-sm focus:outline-none" />
-            </div>
-            {stores.length > 0 && (
-              <div>
-                <label className="block text-xs font-medium text-slate-500 mb-1">İlgili Mağaza</label>
-                <select value={storeId} onChange={(e) => setStoreId(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-border bg-white dark:bg-slate-900 text-foreground text-sm focus:outline-none cursor-pointer">
-                  <option value="">— Mağaza seçin (opsiyonel) —</option>
-                  {stores.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
-                </select>
-              </div>
-            )}
+               <div className="md:col-span-2">
+                 <label className="block text-xs font-medium text-slate-500 mb-1">Müşteri</label>
+                 <select value={customerId} onChange={(e) => setCustomerId(e.target.value)}
+                   className="w-full px-3 py-2 rounded-lg border border-border bg-white dark:bg-slate-900 text-foreground text-sm focus:outline-none cursor-pointer">
+                   <option value="">— Müşteri seçin (opsiyonel) —</option>
+                   {customers.map((c) => <option key={c.id} value={c.id}>{c.name} ({c.type === "corporate" ? "Kurumsal" : "Bireysel"})</option>)}
+                 </select>
+                 {selectedCustomer && (
+                   <p className="mt-1 text-xs text-slate-400">
+                     {selectedCustomer.type === "corporate" ? "🏢 B2B — kurumsal iskonto otomatik uygulanır" : "👤 Bireysel müşteri"}
+                   </p>
+                 )}
+               </div>
+               <div className="col-span-1">
+                 <label className="block text-xs font-medium text-slate-500 mb-1">Kanal</label>
+                 <select value={channel} onChange={(e) => setChannel(e.target.value as "virtual" | "store")}
+                   className="w-full px-3 py-2 rounded-lg border border-border bg-white dark:bg-slate-900 text-foreground text-sm focus:outline-none cursor-pointer">
+                   <option value="virtual">Sanal</option>
+                   <option value="store">Mağaza</option>
+                 </select>
+               </div>
+               {channel === "store" && (
+                 <div className="col-span-1">
+                   <label className="block text-xs font-medium text-slate-500 mb-1">İlgili Mağaza</label>
+                   <select value={storeId} onChange={(e) => setStoreId(e.target.value)}
+                     className="w-full px-3 py-2 rounded-lg border border-border bg-white dark:bg-slate-900 text-foreground text-sm focus:outline-none cursor-pointer">
+                     <option value="">— Mağaza seçin (opsiyonel) —</option>
+                     {stores.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                   </select>
+                 </div>
+               )}
+               <div className="col-span-1">
+                 <label className="block text-xs font-medium text-slate-500 mb-1">Satıcı</label>
+                 <select value={salespersonId} onChange={(e) => setSalespersonId(e.target.value)}
+                   className="w-full px-3 py-2 rounded-lg border border-border bg-white dark:bg-slate-900 text-foreground text-sm focus:outline-none cursor-pointer">
+                   <option value="">— Satıcı seçin (opsiyonel) —</option>
+                   {salespeople.map((sp) => <option key={sp.id} value={sp.id}>{sp.name}</option>)}
+                 </select>
+               </div>
+               <div className="col-span-1">
+                 <label className="block text-xs font-medium text-slate-500 mb-1">Bakım Tarihi</label>
+                 <input type="date" value={maintenanceDate} onChange={(e) => setMaintenanceDate(e.target.value)}
+                   className="w-full px-3 py-2 rounded-lg border border-border bg-white dark:bg-slate-900 text-foreground text-sm focus:outline-none" />
+               </div>
+               <div className="col-span-1">
+                 <label className="block text-xs font-medium text-slate-500 mb-1">Bakım Ücreti</label>
+                 <input type="number" min="0" step="0.01" value={maintenanceFee}
+                   onChange={(e) => setMaintenanceFee(parseFloat(e.target.value) || 0)}
+                   className="w-full px-3 py-2 rounded-lg border border-border bg-white dark:bg-slate-900 text-foreground text-sm focus:outline-none" />
+               </div>
+               <div className="col-span-1 flex items-center">
+                 <input type="checkbox" id="triggerProd" checked={triggerProduction} onChange={(e) => setTriggerProduction(e.target.checked)}
+                   className="mr-2" />
+                 <label htmlFor="triggerProd" className="block text-xs font-medium text-slate-500">Üretimi Tetikle</label>
+               </div>
           </div>
         </div>
 

@@ -168,8 +168,8 @@ export default function RegisterPage() {
 
         <p className="text-xs text-slate-400 text-center">
           {t.rich("terms", {
-            terms: (chunks) => <span className="underline cursor-pointer" style={{ color: "var(--color-primary)" }}>{t("termsOfService")}</span>,
-            privacy: (chunks) => <span className="underline cursor-pointer" style={{ color: "var(--color-primary)" }}>{t("privacyPolicy")}</span>,
+            terms: (chunks) => <span className="underline cursor-pointer" style={{ color: "var(--color-primary)" }}>{chunks}</span>,
+            privacy: (chunks) => <span className="underline cursor-pointer" style={{ color: "var(--color-primary)" }}>{chunks}</span>,
           })}
         </p>
       </form>

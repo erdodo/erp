@@ -62,7 +62,7 @@
     "accountInactive": "Hesabınız aktif değil. Yöneticinize başvurun.",
     "registerTitle": "Hesap oluşturun",
     "registerSubtitle": "Ücretsiz kaydolun, hemen başlayın",
-    "terms": "Kaydolarak {terms} ve {privacy} kabul etmiş olursunuz.",
+    "terms": "Kaydolarak <terms>Kullanım Koşulları</terms> ve <privacy>Gizlilik Politikası</privacy> kabul etmiş olursunuz.",
     "termsOfService": "Kullanım Koşulları",
     "privacyPolicy": "Gizlilik Politikası",
     "alreadyHaveAccount": "Zaten hesabınız var mı?",
@@ -109,7 +109,8 @@
       "superAdmin": "Super Admin",
       "onboarding": "Kurulum Sihirbazı",
       "help": "Yardım",
-      "notifications": "Bildirimler"
+      "notifications": "Bildirimler",
+"calendar": "Takvim"
     }
   },
   "modules": {
@@ -238,7 +239,8 @@
     "location": "Konum",
     "code": "Kod",
     "name": "Ad",
-    "noEquipmentAdded": "Henüz ekipman eklenmedi"
+    "noEquipmentAdded": "Henüz ekipman eklenmedi",
+    "date": "Tarih"
   },
   "placeholders": {
     "searchProduct": "Ürün ara…",
@@ -448,5 +450,29 @@
      "pending": "Beklemede",
      "setupError": "Kurulum sırasında bir hata oluştu",
      "readyDescription": "Hazırlık tamamlandı. Kısa süre sonra dashboard'a yönlendirileceksiniz."
-   }
+   },
+  "calendar": {
+    "title": "Takvim",
+    "subtitle": "Tüm modüllerdeki tarihleri tek ekranda görüntüleyin",
+    "today": "Bugün",
+    "noEvents": "Bu günde etkinlik yok",
+    "filters": {
+      "all": "Tümü",
+      "sales": "Satış Siparişleri",
+      "subscriptions": "Abonelikler",
+      "rent": "Kira / Mülk",
+      "production": "Üretim Emirleri",
+      "projects": "Projeler",
+      "leave": "İzin Talepleri"
+    },
+    "days": {
+      "sun": "Paz",
+      "mon": "Pzt",
+      "tue": "Sal",
+      "wed": "Çar",
+      "thu": "Per",
+      "fri": "Cum",
+      "sat": "Cmt"
+    }
+  }
  }

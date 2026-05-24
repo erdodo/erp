@@ -29,6 +29,7 @@ export const ALL_MODULES: ModuleDef[] = [
   { slug: "employees", name: "Çalışan", nameEn: "Employees", icon: "pi-id-card", route: "/dashboard/employees", group: "İnsan Kaynakları", shortcut: "Y", color: "#065f46" },
   { slug: "recruitment", name: "İşe Alım", nameEn: "Recruitment", icon: "pi-user-plus", route: "/dashboard/recruitment", group: "İnsan Kaynakları", shortcut: "I", color: "#7e22ce" },
   { slug: "leave", name: "İzin Yönetimi", nameEn: "Leave", icon: "pi-calendar-times", route: "/dashboard/leave", group: "İnsan Kaynakları", shortcut: "Z", color: "#be123c" },
+  { slug: "okr", name: "OKR Sistemi", nameEn: "OKR System", icon: "pi-compass", route: "/dashboard/okr", group: "İnsan Kaynakları", shortcut: "O", color: "#0d9488" },
   { slug: "expenses", name: "Gider", nameEn: "Expenses", icon: "pi-wallet", route: "/dashboard/expenses", group: "Finans", shortcut: "GD", color: "#b45309" },
   { slug: "process-tracking", name: "Süreç Takibi", nameEn: "Process Tracking", icon: "pi-sitemap", route: "/dashboard/process-tracking", group: "Proje & Görev", shortcut: "SU", color: "#1e40af" },
   { slug: "service-routes", name: "Güzergah", nameEn: "Service Routes", icon: "pi-map", route: "/dashboard/service-routes", group: "Operasyon", shortcut: "GU", color: "#065f46" },

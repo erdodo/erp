@@ -3,7 +3,7 @@ export const REGISTER_MODULES = [
   "production", "production-method", "five-s", "quality", "equipment",
   "maintenance", "stock", "inventory", "materials", "projects", "tasks",
   "employees", "recruitment", "leave", "expenses", "process-flow",
-  "service-routes", "fleet", "field-service", "iot",
+  "service-routes", "fleet", "field-service", "iot", "okr",
 ];
 
 export const REGISTER_ACTIONS = ["view", "create", "update", "delete", "export"];

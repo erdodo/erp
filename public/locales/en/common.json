@@ -61,7 +61,7 @@
     "accountInactive": "Your account is inactive. Please contact your administrator.",
     "registerTitle": "Create your account",
     "registerSubtitle": "Sign up for free, get started right now",
-    "terms": "By signing up, you agree to our {terms} and {privacy}.",
+    "terms": "By signing up, you agree to our <terms>Terms of Service</terms> and <privacy>Privacy Policy</privacy>.",
     "termsOfService": "Terms of Service",
     "privacyPolicy": "Privacy Policy",
     "alreadyHaveAccount": "Already have an account?",
@@ -108,6 +108,7 @@
       "superAdmin": "Super Admin",
       "onboarding": "Setup Wizard",
       "help": "Help",
+      "calendar": "Calendar",
       "notifications": "Notifications"
     }
   },
@@ -212,6 +213,7 @@
     "completed": "Completed",
     "cancelled": "Cancelled",
     "users": "Users",
+    "date": "Date",
     "customers": "Customers",
     "type": "Type",
     "customer": "Customer",
@@ -456,5 +458,29 @@
     "warning": "Warning",
     "success": "Success",
     "info": "Information"
+  },
+  "calendar": {
+    "title": "Calendar",
+    "subtitle": "View dates from all modules in one place",
+    "today": "Today",
+    "noEvents": "No events on this day",
+    "filters": {
+      "all": "All",
+      "sales": "Sales Orders",
+      "subscriptions": "Subscriptions",
+      "rent": "Rent / Property",
+      "production": "Production Orders",
+      "projects": "Projects",
+      "leave": "Leave Requests"
+    },
+    "days": {
+      "sun": "Sun",
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat"
+    }
   }
 }

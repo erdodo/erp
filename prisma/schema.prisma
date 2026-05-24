@@ -65,6 +65,10 @@ model Tenant {
   virtualSaleChannels  VirtualSaleChannel[]
   warehouses           Warehouse[]
   workflows            Workflow[]
+  okrPeriods           OkrPeriod[]
+  okrTeams             OkrTeam[]
+  okrObjectives        OkrObjective[]
+  okrKeyResults        OkrKeyResult[]
 }
 
 model User {
@@ -91,6 +95,20 @@ model User {
   notifications  Notification[]
   tasks          Task[]         @relation("AssignedTasks")
   createdTasks   Task[]         @relation("CreatedTasks")
+  workLogs       TaskWorkLog[]
+  projectComments ProjectComment[]
+  projectActivities ProjectActivity[]
+  taskComments   TaskComment[]
+  okrTeamMembers OkrTeamMember[]
+  personalObjectives OkrObjective[] @relation("PersonalObjectives")
+  ownedObjectives OkrObjective[] @relation("OwnedObjectives")
+  ownedKeyResults OkrKeyResult[] @relation("OwnedKeyResults")
+  okrPeriodComments OkrPeriodComment[]
+  okrPeriodVotes OkrPeriodVote[]
+  okrObjectiveComments OkrObjectiveComment[]
+  ledTeams       OkrTeam[]      @relation("TeamLeader")
+  projectMembers ProjectMember[]
+  projectExpenses ProjectExpense[]
   employee       Employee?      @relation(fields: [employeeId], references: [id])
   role           Role?          @relation(fields: [roleId], references: [id])
   tenant         Tenant?        @relation(fields: [tenantId], references: [id])
@@ -421,7 +439,10 @@ model Project {
   id          String             @id @default(cuid())
   tenantId    String
   name        String
+  key         String?            // Short key like "ERP", "CRM"
   description String?
+  category    String?            // software, construction, marketing etc
+  color       String?            // hex color for project avatar
   status      String             @default("planning")
   budget      Float?
   currency    String             @default("TRY")
@@ -436,6 +457,12 @@ model Project {
   tenant      Tenant             @relation(fields: [tenantId], references: [id])
   milestones  ProjectMilestone[]
   tasks       Task[]
+  comments    ProjectComment[]
+  activities  ProjectActivity[]
+  sprints     ProjectSprint[]
+  members     ProjectMember[]
+  labels      ProjectLabel[]
+  expenses    ProjectExpense[]
 }
 
 model ProjectMilestone {
@@ -450,30 +477,40 @@ model ProjectMilestone {
 }
 
 model Task {
-  id             String        @id @default(cuid())
-  tenantId       String
-  projectId      String?
-  parentId       String?
-  title          String
-  description    String?
-  status         String        @default("todo")
-  priority       String        @default("medium")
-  assignedTo     String?
-  createdBy      String?
-  dueDate        DateTime?
-  estimatedHours Float?
-  actualHours    Float?
-  tags           String?
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-  deletedAt      DateTime?
-  assignee       User?         @relation("AssignedTasks", fields: [assignedTo], references: [id])
-  creator        User?         @relation("CreatedTasks", fields: [createdBy], references: [id])
-  parent         Task?         @relation("SubTasks", fields: [parentId], references: [id])
-  subtasks       Task[]        @relation("SubTasks")
-  project        Project?      @relation(fields: [projectId], references: [id])
-  tenant         Tenant        @relation(fields: [tenantId], references: [id])
-  comments       TaskComment[]
+  id              String        @id @default(cuid())
+  tenantId        String
+  projectId       String?
+  parentId        String?
+  sprintId        String?       // linked sprint
+  title           String
+  description     String?       // rich text / markdown
+  type            String        @default("task") // epic, story, task, bug, subtask
+  status          String        @default("todo")
+  priority        String        @default("medium")
+  storyPoints     Int?          // agile story points
+  position        Int           @default(0) // ordering within column
+  assignedTo      String?
+  createdBy       String?
+  dueDate         DateTime?
+  estimatedHours  Float?
+  actualHours     Float?
+  tags            String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  deletedAt       DateTime?
+  integrationType String?
+  integrationId   String?
+  assignee        User?         @relation("AssignedTasks", fields: [assignedTo], references: [id])
+  creator         User?         @relation("CreatedTasks", fields: [createdBy], references: [id])
+  parent          Task?         @relation("SubTasks", fields: [parentId], references: [id])
+  subtasks        Task[]        @relation("SubTasks")
+  project         Project?      @relation(fields: [projectId], references: [id])
+  sprint          ProjectSprint? @relation(fields: [sprintId], references: [id])
+  tenant          Tenant        @relation(fields: [tenantId], references: [id])
+  comments        TaskComment[]
+  workLogs        TaskWorkLog[]
+  activities      ProjectActivity[]
+  labels          TaskLabel[]
 }
 
 model TaskComment {
@@ -484,6 +521,7 @@ model TaskComment {
   createdAt DateTime  @default(now())
   deletedAt DateTime?
   task      Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user      User?     @relation(fields: [userId], references: [id])
 }
 
 model Equipment {
@@ -697,6 +735,7 @@ model Department {
   children  Department[] @relation("SubDepartments")
   tenant    Tenant       @relation(fields: [tenantId], references: [id])
   employees Employee[]
+  okrObjectives OkrObjective[]
 }
 
 model Employee {
@@ -1209,4 +1248,215 @@ model PrintTemplate {
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
   tenant    Tenant    @relation(fields: [tenantId], references: [id])
+}
+
+model TaskWorkLog {
+  id          String   @id @default(cuid())
+  taskId      String
+  userId      String
+  hours       Float
+  description String?
+  loggedAt    DateTime @default(now())
+  task        Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+model ProjectComment {
+  id        String    @id @default(cuid())
+  projectId String
+  userId    String
+  body      String
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id])
+}
+
+model ProjectActivity {
+  id        String   @id @default(cuid())
+  projectId String
+  taskId    String?
+  userId    String
+  action    String
+  details   String
+  createdAt DateTime @default(now())
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  task      Task?    @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model ProjectSprint {
+  id          String    @id @default(cuid())
+  projectId   String
+  name        String
+  goal        String?
+  status      String    @default("planning") // planning, active, completed
+  startDate   DateTime?
+  endDate     DateTime?
+  velocity    Float?    // completed story points
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  tasks       Task[]
+}
+
+model ProjectMember {
+  id        String   @id @default(cuid())
+  projectId String
+  userId    String
+  role      String   @default("member") // owner, lead, member, viewer
+  joinedAt  DateTime @default(now())
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([projectId, userId])
+}
+
+model ProjectLabel {
+  id        String      @id @default(cuid())
+  projectId String
+  name      String
+  color     String      @default("#6366f1")
+  project   Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  tasks     TaskLabel[]
+}
+
+model TaskLabel {
+  taskId  String
+  labelId String
+  task    Task         @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  label   ProjectLabel @relation(fields: [labelId], references: [id], onDelete: Cascade)
+
+  @@id([taskId, labelId])
+}
+
+model ProjectExpense {
+  id          String   @id @default(cuid())
+  projectId   String
+  taskId      String?
+  userId      String
+  title       String
+  amount      Float
+  currency    String   @default("TRY")
+  category    String   @default("other") // personnel, material, service, travel, other
+  description String?
+  expenseDate DateTime @default(now())
+  createdAt   DateTime @default(now())
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+model OkrPeriod {
+  id            String             @id @default(cuid())
+  tenantId      String
+  name          String
+  type          String             // "quarterly" or "yearly"
+  startDate     DateTime
+  endDate       DateTime
+  isActive      Boolean            @default(true)
+  votingActive  Boolean            @default(true)
+  createdAt     DateTime           @default(now())
+  deletedAt     DateTime?
+  tenant        Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  objectives    OkrObjective[]
+  comments      OkrPeriodComment[]
+  votes         OkrPeriodVote[]
+}
+
+model OkrTeam {
+  id          String             @id @default(cuid())
+  tenantId    String
+  name        String
+  description String?
+  leaderId    String?
+  createdAt   DateTime           @default(now())
+  deletedAt   DateTime?
+  tenant      Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  leader      User?              @relation("TeamLeader", fields: [leaderId], references: [id])
+  members     OkrTeamMember[]
+  objectives  OkrObjective[]
+}
+
+model OkrTeamMember {
+  id     String  @id @default(cuid())
+  teamId String
+  userId String
+  team   OkrTeam @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model OkrObjective {
+  id            String                @id @default(cuid())
+  tenantId      String
+  periodId      String
+  title         String
+  description   String?
+  level         String                // "company", "department", "team", "personal"
+  departmentId  String?
+  teamId        String?
+  userId        String?               // for personal objectives
+  ownerId       String?
+  progress      Float                 @default(0)
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+  deletedAt     DateTime?
+  tenant        Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  period        OkrPeriod             @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  department    Department?           @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  team          OkrTeam?              @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  user          User?                 @relation("PersonalObjectives", fields: [userId], references: [id], onDelete: SetNull)
+  owner         User?                 @relation("OwnedObjectives", fields: [ownerId], references: [id], onDelete: SetNull)
+  keyResults    OkrKeyResult[]
+  comments      OkrObjectiveComment[]
+}
+
+model OkrKeyResult {
+  id           String       @id @default(cuid())
+  tenantId     String
+  objectiveId  String
+  title        String
+  description  String?
+  initialValue Float        @default(0)
+  currentValue Float        @default(0)
+  targetValue  Float        @default(100)
+  unit         String       @default("%")
+  progress     Float        @default(0)
+  ownerId      String?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  deletedAt    DateTime?
+  tenant       Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  objective    OkrObjective @relation(fields: [objectiveId], references: [id], onDelete: Cascade)
+  owner        User?        @relation("OwnedKeyResults", fields: [ownerId], references: [id], onDelete: SetNull)
+}
+
+model OkrPeriodComment {
+  id        String    @id @default(cuid())
+  periodId  String
+  userId    String
+  body      String
+  createdAt DateTime  @default(now())
+  period    OkrPeriod @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model OkrPeriodVote {
+  id        String    @id @default(cuid())
+  periodId  String
+  userId    String
+  score     Int
+  comment   String?
+  createdAt DateTime  @default(now())
+  period    OkrPeriod @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model OkrObjectiveComment {
+  id          String       @id @default(cuid())
+  objectiveId String
+  userId      String
+  body        String
+  createdAt   DateTime     @default(now())
+  objective   OkrObjective @relation(fields: [objectiveId], references: [id], onDelete: Cascade)
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

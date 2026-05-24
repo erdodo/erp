@@ -23,6 +23,20 @@ export function Sidebar() {
 
   const isSuperAdmin = session?.user?.isSuperAdmin;
 
+  const [onboardingDone, setOnboardingDone] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    if (!session?.user?.tenantId) return;
+    fetch("/api/tenant/onboarding")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && typeof data.done === "boolean") {
+          setOnboardingDone(data.done);
+        }
+      })
+      .catch(() => {});
+  }, [pathname, session?.user?.tenantId]);
+
   // Use false until mounted to match SSR — avoids Zustand persist hydration mismatch
   const collapsed = mounted ? sidebarCollapsed : false;
 
@@ -128,7 +142,10 @@ export function Sidebar() {
 
       {/* Bottom */}
       <div className="border-t border-border p-2 shrink-0 space-y-0.5">
-        <NavItem href="/dashboard/onboarding" icon="pi-sparkles" label={t("sidebar.nav.onboarding")} shortcut="OB" active={pathname.startsWith("/dashboard/onboarding")} collapsed={collapsed} />
+        {onboardingDone === false && (
+          <NavItem href="/dashboard/onboarding" icon="pi-sparkles" label={t("sidebar.nav.onboarding")} shortcut="OB" active={pathname.startsWith("/dashboard/onboarding")} collapsed={collapsed} />
+        )}
+        <NavItem href="/dashboard/calendar" icon="pi-calendar" label={t("sidebar.nav.calendar")} shortcut="C" active={pathname.startsWith("/dashboard/calendar")} collapsed={collapsed} />
         <NavItem href="/dashboard/help" icon="pi-question-circle" label={t("sidebar.nav.help")} shortcut="HE" active={pathname.startsWith("/dashboard/help")} collapsed={collapsed} />
         <NavItem href="/dashboard/notifications" icon="pi-bell" label={t("sidebar.nav.notifications")} shortcut="NB" active={pathname.startsWith("/dashboard/notifications")} collapsed={collapsed} />
       </div>

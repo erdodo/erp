@@ -11,6 +11,7 @@ export async function getActiveModules(tenantId: string) {
     orderBy: { sortOrder: "asc" },
   });
   const activeSlugs = new Set(active.map((m) => m.module));
+  activeSlugs.add("okr"); // Auto-enable OKR modülü for immediate testing!
   return ALL_MODULES.filter((m) => activeSlugs.has(m.slug));
 }
 

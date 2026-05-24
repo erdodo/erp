@@ -6,8 +6,8 @@ import { CustomerTable } from "@/components/crm/CustomerTable";
 import type { CrmCustomer } from "@/lib/crm-types";
 
 export async function generateMetadata() {
-  const t = await getTranslations("common");
-  return { title: t("crm.customers") };
+  const t = await getTranslations("crm");
+  return { title: t("customers") };
 }
 
 export default async function CrmCustomersPage() {

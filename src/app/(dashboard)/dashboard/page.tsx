@@ -12,13 +12,32 @@ export default async function DashboardPage() {
   let activeModuleCount = 0;
   let tenantName = "ERP Sistemi";
 
+  let activeOkrPeriod: string | null = null;
+  let okrStats = { count: 0, avgProgress: 0 };
+
   if (user.tenantId) {
-    const [modules, tenant] = await Promise.all([
+    const [modules, tenant, okrPeriod] = await Promise.all([
       prisma.tenantModule.count({ where: { tenantId: user.tenantId, isActive: true } }),
       prisma.tenant.findUnique({ where: { id: user.tenantId }, select: { name: true } }),
+      prisma.okrPeriod.findFirst({ where: { tenantId: user.tenantId, isActive: true, deletedAt: null }, select: { id: true, name: true } })
     ]);
     activeModuleCount = modules;
     tenantName = tenant?.name ?? tenantName;
+
+    if (okrPeriod) {
+      activeOkrPeriod = okrPeriod.name;
+      const [count, aggregate] = await Promise.all([
+        prisma.okrObjective.count({ where: { periodId: okrPeriod.id, deletedAt: null } }),
+        prisma.okrObjective.aggregate({
+          where: { periodId: okrPeriod.id, deletedAt: null },
+          _avg: { progress: true }
+        })
+      ]);
+      okrStats = {
+        count,
+        avgProgress: aggregate._avg.progress ? Math.round(aggregate._avg.progress * 10) / 10 : 0
+      };
+    }
   }
 
   const initialLayouts = await prisma.dashboardLayout.findMany({
@@ -102,6 +121,44 @@ export default async function DashboardPage() {
           ))}
         </div>
       </div>
+
+      {/* OKR Summary Widget */}
+      {activeOkrPeriod && (
+        <div className="bg-gradient-to-r from-teal-50 to-emerald-50 dark:from-teal-950/20 dark:to-slate-900 border border-teal-200/50 dark:border-teal-900/40 rounded-2xl p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="bg-teal-600 text-white text-[9px] font-black uppercase px-2.5 py-0.5 rounded-full">OKR Hedef Takip</span>
+              <span className="text-xs font-bold text-teal-700 dark:text-teal-400 font-mono">{activeOkrPeriod}</span>
+            </div>
+            <h3 className="font-extrabold text-base text-slate-800 dark:text-slate-200">
+              Bu Döneme Ait OKR Başarı Durumu
+            </h3>
+            <p className="text-xs text-slate-500 max-w-md font-medium">
+              Bu çeyrekteki tüm şirket, departman ve takım seviyesindeki hedeflerinize genel bakış.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-5 shrink-0 w-full md:w-auto justify-between md:justify-end">
+            <div className="flex gap-5">
+              <div className="text-center">
+                <p className="text-[10px] font-black uppercase text-slate-400">Aktif Hedefler</p>
+                <p className="text-2xl font-black text-slate-800 dark:text-slate-200 font-mono">{okrStats.count}</p>
+              </div>
+              <div className="w-px h-8 bg-teal-200" />
+              <div className="text-center">
+                <p className="text-[10px] font-black uppercase text-slate-400">Ortalama Başarı</p>
+                <p className="text-2xl font-black text-teal-600 font-mono">{okrStats.avgProgress}%</p>
+              </div>
+            </div>
+            <a
+              href="/dashboard/okr"
+              className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white font-black text-xs rounded-xl shadow-sm shadow-teal-500/10 transition"
+            >
+              Hizalamayı Gör
+            </a>
+          </div>
+        </div>
+      )}
 
       {/* Custom Widget Dashboard */}
       <div>
