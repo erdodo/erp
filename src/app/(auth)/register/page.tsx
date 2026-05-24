@@ -56,11 +56,12 @@ export default function RegisterPage() {
         redirect: false,
       });
 
-      if (result?.error) {
-        router.push("/login");
-      } else {
+      if (result?.ok) {
         router.push("/dashboard");
         router.refresh();
+      } else {
+        setError("Giriş başarısız. Lütfen tekrar deneyin.");
+        setLoading(false);
       }
     } catch {
       setError("Bir bağlantı hatası oluştu. Lütfen tekrar deneyin.");
