@@ -53,7 +53,6 @@ export async function proxy(request: NextRequest) {
     const callbackUrl = searchParams.get("callbackUrl") ?? "/dashboard";
     return NextResponse.redirect(new URL(callbackUrl, request.url));
   }
-
   return NextResponse.next();
 }
 
