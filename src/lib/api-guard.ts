@@ -6,6 +6,7 @@ import { logAction, type AuditAction } from "@/lib/audit";
 export interface GuardedSession {
   userId: string;
   tenantId: string;
+  isSuperAdmin: boolean;
 }
 
 /**
@@ -19,10 +20,17 @@ export async function requireAuth(): Promise<
   if (!session?.user?.id) {
     return { ok: false, res: NextResponse.json({ error: "Unauthorized" }, { status: 401 }) };
   }
-  if (!session.user.tenantId) {
+  if (!session.user.tenantId && !session.user.isSuperAdmin) {
     return { ok: false, res: NextResponse.json({ error: "Tenant yok" }, { status: 403 }) };
   }
-  return { ok: true, session: { userId: session.user.id, tenantId: session.user.tenantId } };
+  return {
+    ok: true,
+    session: {
+      userId: session.user.id,
+      tenantId: session.user.tenantId ?? "",
+      isSuperAdmin: session.user.isSuperAdmin,
+    },
+  };
 }
 
 /**
@@ -33,6 +41,10 @@ export async function requireModule(
 ): Promise<{ ok: true; session: GuardedSession } | { ok: false; res: NextResponse }> {
   const authResult = await requireAuth();
   if (!authResult.ok) return authResult;
+
+  if (authResult.session.isSuperAdmin) {
+    return { ok: true, session: authResult.session };
+  }
 
   const { tenantId } = authResult.session;
 

@@ -39,19 +39,6 @@ export async function POST(req: NextRequest) {
     const hashedPassword = await hash(data.password, 12);
 
     // Create permissions outside transaction (batch operation)
-    const permissionIds: Record<string, string> = {};
-    for (const mod of MODULES) {
-      for (const action of ACTIONS) {
-        const perm = await prisma.permission.upsert({
-          where: { module_action: { module: mod, action } },
-          update: {},
-          create: { module: mod, action, description: `${mod}:${action}` },
-          select: { id: true },
-        });
-        permissionIds[`${mod}:${action}`] = perm.id;
-      }
-    }
-
     const result = await prisma.$transaction(
       async (tx) => {
         const tenant = await tx.tenant.create({
@@ -83,17 +70,6 @@ export async function POST(req: NextRequest) {
           },
         });
 
-        // Batch insert rolePermissions
-        const rolePermData = MODULES.flatMap((mod) =>
-          ACTIONS.map((action) => ({
-            roleId: adminRole.id,
-            permissionId: permissionIds[`${mod}:${action}`],
-          }))
-        );
-        if (rolePermData.length > 0) {
-          await tx.rolePermission.createMany({ data: rolePermData });
-        }
-
         const user = await tx.user.create({
           data: {
             name: data.name,
@@ -105,32 +81,6 @@ export async function POST(req: NextRequest) {
             roleId: adminRole.id,
           },
         });
-
-        // Batch insert tenantModules
-        const moduleData = MODULES.map((mod, i) => ({
-          tenantId: tenant.id,
-          module: mod,
-          isActive: false,
-          sortOrder: i,
-        }));
-        await tx.tenantModule.createMany({ data: moduleData });
-
-        // Batch insert quotas
-        const defaultQuotas = [
-          { resource: "employees", maxCount: 50 },
-          { resource: "customers", maxCount: 500 },
-          { resource: "projects", maxCount: 20 },
-          { resource: "sales", maxCount: 1000 },
-          { resource: "warehouses", maxCount: 5 },
-          { resource: "users", maxCount: 25 },
-        ];
-        const quotaData = defaultQuotas.map((q) => ({
-          tenantId: tenant.id,
-          ...q,
-          currentCount: 0,
-          isUnlimited: false,
-        }));
-        await tx.tenantQuota.createMany({ data: quotaData });
 
         return { user, tenant };
       },

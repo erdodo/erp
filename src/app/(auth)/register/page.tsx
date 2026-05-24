@@ -57,8 +57,7 @@ export default function RegisterPage() {
       });
 
       if (result?.ok) {
-        router.push("/dashboard");
-        router.refresh();
+        router.push(`/register/setup?tenantId=${data.tenantId}`);
       } else {
         setError("Giriş başarısız. Lütfen tekrar deneyin.");
         setLoading(false);
