@@ -36,12 +36,12 @@ export default function LoginPage() {
       redirect: false,
     });
 
-    setLoading(false);
-    if (result?.error) {
-      setFormError("E-posta veya şifre hatalı.");
-    } else {
+    if (result?.ok) {
       router.push(callbackUrl);
       router.refresh();
+    } else {
+      setLoading(false);
+      setFormError("E-posta veya şifre hatalı.");
     }
   }
 
