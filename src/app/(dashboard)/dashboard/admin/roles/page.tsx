@@ -30,7 +30,7 @@ function permSet(perms: { permission: Permission }[]): Set<string> {
 }
 
 export default function AdminRolesPage() {
-  const t = useTranslations("common");
+  const t = useTranslations();
   const [roles, setRoles] = useState<RoleWithPerms[]>([]);
   const [selectedRole, setSelectedRole] = useState<RoleWithPerms | null>(null);
   const [matrix, setMatrix] = useState<Set<string>>(new Set());

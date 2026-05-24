@@ -18,13 +18,18 @@ export async function GET(req: NextRequest) {
     ...(search ? { OR: [{ name: { contains: search } }, { employeeNo: { contains: search } }, { position: { contains: search } }] } : {}),
     ...(deptId ? { departmentId: deptId } : {}),
   };
-  const [employees, total, departments] = await Promise.all([
+  const [employees, total, departments, stores] = await Promise.all([
     prisma.employee.findMany({ where, skip: (page-1)*limit, take: limit, orderBy: { name: "asc" },
-      include: { department: { select: { id: true, name: true } } } }),
+      include: {
+        department: { select: { id: true, name: true } },
+        store: { select: { id: true, name: true } },
+        vehicles: { where: { deletedAt: null }, select: { id: true, plate: true, brand: true, model: true } },
+      } }),
     prisma.employee.count({ where }),
     prisma.department.findMany({ where: { tenantId, deletedAt: null }, orderBy: { name: "asc" } }),
+    prisma.retailStore.findMany({ where: { tenantId, deletedAt: null }, orderBy: { name: "asc" } }),
   ]);
-  return NextResponse.json({ employees, total, pages: Math.ceil(total/limit), departments });
+  return NextResponse.json({ employees, total, pages: Math.ceil(total/limit), departments, stores });
 }
 
 export async function POST(req: NextRequest) {
@@ -34,7 +39,7 @@ export async function POST(req: NextRequest) {
   const quota = await checkQuota(tenantId, "employees");
   if (!quota.allowed) return NextResponse.json({ error: `Çalışan kotası doldu (${quota.current}/${quota.max})` }, { status: 429 });
   const body = await req.json() as {
-    employeeNo: string; name: string; email?: string; phone?: string; departmentId?: string;
+    employeeNo: string; name: string; email?: string; phone?: string; departmentId?: string; storeId?: string;
     position?: string; managerId?: string; salary?: number; currency?: string;
     hireDate?: string; birthDate?: string; address?: string;
   };
@@ -42,14 +47,17 @@ export async function POST(req: NextRequest) {
   const emp = await prisma.employee.create({
     data: {
       tenantId, employeeNo: body.employeeNo, name: body.name, email: body.email ?? null,
-      phone: body.phone ?? null, departmentId: body.departmentId ?? null,
+      phone: body.phone ?? null, departmentId: body.departmentId ?? null, storeId: body.storeId ?? null,
       position: body.position ?? null, managerId: body.managerId ?? null,
       salary: body.salary ?? null, currency: body.currency ?? "TRY",
       hireDate: body.hireDate ? new Date(body.hireDate) : null,
       birthDate: body.birthDate ? new Date(body.birthDate) : null,
       address: body.address ?? null,
     },
-    include: { department: { select: { id: true, name: true } } },
+    include: {
+      department: { select: { id: true, name: true } },
+      store: { select: { id: true, name: true } },
+    },
   });
   await incrementQuota(tenantId, "employees");
   await auditLog(guard.session, "create", "employees", emp.id, { ipAddress: getIpFromRequest(req) });
@@ -69,6 +77,7 @@ export async function PATCH(req: NextRequest) {
       ...(rest.email        !== undefined ? { email: rest.email as string | null } : {}),
       ...(rest.phone        !== undefined ? { phone: rest.phone as string | null } : {}),
       ...(rest.departmentId !== undefined ? { departmentId: rest.departmentId as string | null } : {}),
+      ...(rest.storeId      !== undefined ? { storeId: rest.storeId as string | null } : {}),
       ...(rest.position     !== undefined ? { position: rest.position as string | null } : {}),
       ...(rest.managerId    !== undefined ? { managerId: rest.managerId as string | null } : {}),
       ...(rest.salary       !== undefined ? { salary: rest.salary as number | null } : {}),

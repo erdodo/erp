@@ -17,7 +17,7 @@ interface UserRow {
 interface Role { id: string; name: string }
 
 export default function AdminUsersPage() {
-  const t = useTranslations("common");
+  const t = useTranslations();
   const [users, setUsers] = useState<UserRow[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
   const [search, setSearch] = useState("");

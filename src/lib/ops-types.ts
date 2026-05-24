@@ -38,7 +38,10 @@ export interface Vehicle {
   id: string; tenantId: string; plate: string; brand: string | null; model: string | null;
   year: number | null; fuelType: FuelType; driverId: string | null; status: VehicleStatus;
   insuranceExpiry: string | null; inspectionExpiry: string | null; notes: string | null;
-  createdAt: string; _count?: { fuelRecords: number };
+  createdAt: string;
+  driver?: { id: string; name: string } | null;
+  expenses?: Expense[];
+  _count?: { fuelRecords: number; expenses: number };
 }
 
 export interface FuelRecord {
@@ -78,7 +81,11 @@ export interface FieldService {
 export interface RentalProperty {
   id: string; tenantId: string; name: string; type: string; address: string | null;
   area: number | null; isActive: boolean; createdAt: string;
+  storeId?: string | null;
+  warehouseId?: string | null;
   contracts?: RentalContract[];
+  store?: { id: string; name: string } | null;
+  warehouse?: { id: string; name: string } | null;
   _count?: { contracts: number };
 }
 

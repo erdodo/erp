@@ -46,12 +46,15 @@ export interface Department {
 
 export interface Employee {
   id: string; tenantId: string; employeeNo: string; name: string; email: string | null;
-  phone: string | null; departmentId: string | null; position: string | null;
+  phone: string | null; departmentId: string | null; storeId: string | null; position: string | null;
   managerId: string | null; salary: number | null; currency: string;
+  relativeLocation?: string; // conceptual location details
   hireDate: string | null; birthDate: string | null; address: string | null;
   isActive: boolean; createdAt: string; updatedAt: string;
   department?: { id: string; name: string } | null;
+  store?:      { id: string; name: string } | null;
   manager?:    { id: string; name: string } | null;
+  vehicles?:   { id: string; plate: string; brand: string | null; model: string | null }[];
 }
 
 export interface LeaveRequest {

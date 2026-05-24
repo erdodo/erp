@@ -18,7 +18,7 @@ interface ContextMenu { x: number; y: number; customer: CrmCustomer }
 
 export function CustomerTable({ initialCustomers, initialTotal, initialPages }: Props) {
   const router = useRouter();
-  const t = useTranslations("common");
+  const t = useTranslations();
   
   const SORT_FIELDS = [
     { id: "createdAt", label: t("labels.created") },

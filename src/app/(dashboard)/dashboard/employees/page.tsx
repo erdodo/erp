@@ -3,11 +3,12 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import type { Employee, Department } from "@/lib/hr-types";
 
-const EMPTY = { employeeNo: "", name: "", email: "", phone: "", departmentId: "", position: "", salary: 0, currency: "TRY", hireDate: "" };
+const EMPTY = { employeeNo: "", name: "", email: "", phone: "", departmentId: "", storeId: "", position: "", salary: 0, currency: "TRY", hireDate: "" };
 
 export default function EmployeesPage() {
   const [employees,   setEmployees]   = useState<Employee[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
+  const [stores,      setStores]      = useState<{ id: string; name: string }[]>([]);
   const [total,       setTotal]       = useState(0);
   const [pages,       setPages]       = useState(1);
   const [page,        setPage]        = useState(1);
@@ -24,9 +25,10 @@ export default function EmployeesPage() {
     const p = opts?.pg ?? page; const q = opts?.s ?? search; const d = opts?.d ?? deptF;
     const params = new URLSearchParams({ page: String(p), search: q, departmentId: d });
     const r = await fetch(`/api/modules/hr/employees?${params}`);
-    const data = await r.json() as { employees: Employee[]; total: number; pages: number; departments: Department[] };
+    const data = await r.json() as { employees: Employee[]; total: number; pages: number; departments: Department[]; stores?: { id: string; name: string }[] };
     setEmployees(data.employees); setTotal(data.total); setPages(data.pages);
     if (data.departments.length) setDepartments(data.departments);
+    if (data.stores) setStores(data.stores);
     setLoading(false);
   }, [page, search, deptF]);
 
@@ -38,13 +40,32 @@ export default function EmployeesPage() {
   }, []);
 
   function openEdit(emp: Employee) {
-    setForm({ employeeNo: emp.employeeNo, name: emp.name, email: emp.email ?? "", phone: emp.phone ?? "", departmentId: emp.departmentId ?? "", position: emp.position ?? "", salary: emp.salary ?? 0, currency: emp.currency, hireDate: emp.hireDate ? emp.hireDate.slice(0,10) : "" });
+    setForm({
+      employeeNo: emp.employeeNo,
+      name: emp.name,
+      email: emp.email ?? "",
+      phone: emp.phone ?? "",
+      departmentId: emp.departmentId ?? "",
+      storeId: emp.storeId ?? "",
+      position: emp.position ?? "",
+      salary: emp.salary ?? 0,
+      currency: emp.currency,
+      hireDate: emp.hireDate ? emp.hireDate.slice(0, 10) : "",
+    });
     setDrawer(emp);
   }
 
   async function save() {
     setSaving(true);
-    const payload = { ...form, email: form.email||undefined, phone: form.phone||undefined, departmentId: form.departmentId||undefined, position: form.position||undefined, hireDate: form.hireDate||undefined };
+    const payload = {
+      ...form,
+      email: form.email || undefined,
+      phone: form.phone || undefined,
+      departmentId: form.departmentId || undefined,
+      storeId: form.storeId || undefined,
+      position: form.position || undefined,
+      hireDate: form.hireDate || undefined,
+    };
     if (typeof drawer === "string") {
       await fetch("/api/modules/hr/employees", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
     } else if (drawer !== null) {
@@ -100,6 +121,7 @@ export default function EmployeesPage() {
                 <th className="py-3 px-5 text-left font-medium text-slate-500">Sicil</th>
                 <th className="py-3 px-4 text-left font-medium text-slate-500">Ad Soyad</th>
                 <th className="py-3 px-4 text-left font-medium text-slate-500 hidden md:table-cell">Departman</th>
+                <th className="py-3 px-4 text-left font-medium text-slate-500 hidden md:table-cell">Çalıştığı Konum</th>
                 <th className="py-3 px-4 text-left font-medium text-slate-500 hidden sm:table-cell">Pozisyon</th>
                 <th className="py-3 px-4 text-left font-medium text-slate-500 hidden lg:table-cell">İşe Giriş</th>
                 <th className="py-3 px-4 font-medium text-slate-500">Durum</th>
@@ -108,7 +130,7 @@ export default function EmployeesPage() {
             </thead>
             <tbody>
               {employees.length === 0 ? (
-                <tr><td colSpan={7} className="py-16 text-center text-slate-400">
+                <tr><td colSpan={8} className="py-16 text-center text-slate-400">
                   <i className="pi pi-id-card text-4xl block mb-2 opacity-30" />
                   {search || deptF ? "Filtreye uyan çalışan yok" : "Henüz çalışan eklenmedi"}
                 </td></tr>
@@ -120,8 +142,14 @@ export default function EmployeesPage() {
                   <td className="py-3 px-4">
                     <p className="font-medium text-foreground">{emp.name}</p>
                     {emp.email && <p className="text-xs text-slate-400">{emp.email}</p>}
+                    {emp.vehicles && emp.vehicles.length > 0 && (
+                      <span className="inline-flex items-center gap-1 mt-1 text-[10px] bg-indigo-50 text-indigo-700 dark:bg-indigo-950/20 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/30 px-2 py-0.5 rounded-md font-medium">
+                        <i className="pi pi-car text-[9px]" /> {emp.vehicles[0].plate}
+                      </span>
+                    )}
                   </td>
                   <td className="py-3 px-4 text-slate-400 hidden md:table-cell">{emp.department?.name ?? "—"}</td>
+                  <td className="py-3 px-4 text-slate-400 hidden md:table-cell">{emp.store?.name ?? "—"}</td>
                   <td className="py-3 px-4 text-slate-400 hidden sm:table-cell">{emp.position ?? "—"}</td>
                   <td className="py-3 px-4 text-slate-400 hidden lg:table-cell">{emp.hireDate ? new Date(emp.hireDate).toLocaleDateString("tr-TR") : "—"}</td>
                   <td className="py-3 px-4">
@@ -169,6 +197,11 @@ export default function EmployeesPage() {
                   <select value={form.departmentId} onChange={(e) => setForm((p) => ({ ...p, departmentId: e.target.value }))} className="w-full px-3 py-2 rounded-lg border border-border bg-white dark:bg-slate-900 text-foreground text-sm cursor-pointer">
                     <option value="">— Seçin —</option>
                     {departments.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+                  </select></div>
+                <div><label className="block text-xs font-medium text-slate-500 mb-1">Çalıştığı Mülk / Konum</label>
+                  <select value={form.storeId} onChange={(e) => setForm((p) => ({ ...p, storeId: e.target.value }))} className="w-full px-3 py-2 rounded-lg border border-border bg-white dark:bg-slate-900 text-foreground text-sm cursor-pointer">
+                    <option value="">— Seçin —</option>
+                    {stores.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
                   </select></div>
                 <div><label className="block text-xs font-medium text-slate-500 mb-1">Pozisyon</label>
                   <input value={form.position} onChange={(e) => setForm((p) => ({ ...p, position: e.target.value }))} className="w-full px-3 py-2 rounded-lg border border-border text-foreground text-sm focus:outline-none" /></div>

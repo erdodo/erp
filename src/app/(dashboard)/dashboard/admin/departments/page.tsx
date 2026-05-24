@@ -13,7 +13,7 @@ interface Dept {
 }
 
 export default function AdminDepartmentsPage() {
-  const t = useTranslations("common");
+  const t = useTranslations();
   const [depts, setDepts] = useState<Dept[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);

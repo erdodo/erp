@@ -12,10 +12,9 @@ export interface ModuleDef {
 export const ALL_MODULES: ModuleDef[] = [
   { slug: "crm", name: "CRM", nameEn: "CRM", icon: "pi-users", route: "/dashboard/crm", group: "Satış & Müşteri", shortcut: "C", color: "#2563eb" },
   { slug: "sales", name: "Satış", nameEn: "Sales", icon: "pi-shopping-cart", route: "/dashboard/sales", group: "Satış & Müşteri", shortcut: "S", color: "#16a34a" },
-  { slug: "retail", name: "Mağaza", nameEn: "Retail", icon: "pi-shop", route: "/dashboard/retail", group: "Satış & Müşteri", shortcut: "M", color: "#ea580c" },
   { slug: "virtual-sales", name: "Sanal Satış", nameEn: "Virtual Sales", icon: "pi-globe", route: "/dashboard/virtual-sales", group: "Satış & Müşteri", shortcut: "V", color: "#7c3aed" },
   { slug: "subscriptions", name: "Abonelik", nameEn: "Subscriptions", icon: "pi-credit-card", route: "/dashboard/subscriptions", group: "Satış & Müşteri", shortcut: "A", color: "#0891b2" },
-  { slug: "rental", name: "Kira", nameEn: "Rental", icon: "pi-home", route: "/dashboard/rental", group: "Satış & Müşteri", shortcut: "K", color: "#65a30d" },
+  { slug: "rental", name: "Mülk & Kira", nameEn: "Properties & Rent", icon: "pi-building", route: "/dashboard/properties", group: "Operasyon", shortcut: "K", color: "#65a30d" },
   { slug: "production", name: "Üretim Takip", nameEn: "Production", icon: "pi-cog", route: "/dashboard/production", group: "Üretim & Kalite", shortcut: "U", color: "#dc2626" },
   { slug: "production-method", name: "Üretim Metot", nameEn: "Production Method", icon: "pi-list", route: "/dashboard/production-method", group: "Üretim & Kalite", shortcut: "T", color: "#b45309" },
   { slug: "five-s", name: "5S Denetim", nameEn: "5S Audit", icon: "pi-check-square", route: "/dashboard/five-s", group: "Üretim & Kalite", shortcut: "F", color: "#7c3aed" },
@@ -35,7 +34,6 @@ export const ALL_MODULES: ModuleDef[] = [
   { slug: "service-routes", name: "Güzergah", nameEn: "Service Routes", icon: "pi-map", route: "/dashboard/service-routes", group: "Operasyon", shortcut: "GU", color: "#065f46" },
   { slug: "fleet", name: "Filo", nameEn: "Fleet", icon: "pi-car", route: "/dashboard/fleet", group: "Operasyon", shortcut: "FL", color: "#374151" },
   { slug: "field-services", name: "Saha Hizmet", nameEn: "Field Service", icon: "pi-map-marker", route: "/dashboard/field-services", group: "Operasyon", shortcut: "SH", color: "#0891b2" },
-  { slug: "rent", name: "Kira Yönetimi", nameEn: "Rent", icon: "pi-building", route: "/dashboard/rent", group: "Operasyon", shortcut: "KR", color: "#65a30d" },
   { slug: "api-keys", name: "API Anahtarları", nameEn: "API Keys", icon: "pi-key", route: "/dashboard/api-keys", group: "Teknoloji", shortcut: "AK", color: "#374151" },
   { slug: "iot", name: "IoT", nameEn: "IoT", icon: "pi-wifi", route: "/dashboard/iot", group: "Teknoloji", shortcut: "IO", color: "#7c3aed" },
 ];
