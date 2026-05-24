@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import { AdminNav } from "@/components/admin/AdminNav";
 
 interface Dept {
@@ -12,6 +13,7 @@ interface Dept {
 }
 
 export default function AdminDepartmentsPage() {
+  const t = useTranslations("common");
   const [depts, setDepts] = useState<Dept[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
@@ -59,7 +61,7 @@ export default function AdminDepartmentsPage() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("Bu departmanı silmek istiyor musunuz?")) return;
+    if (!confirm(t("confirmations.deleteDepartment"))) return;
     await fetch(`/api/admin/departments/${id}`, { method: "DELETE" });
     await load();
   }
@@ -76,14 +78,14 @@ export default function AdminDepartmentsPage() {
     <div className="max-w-4xl mx-auto space-y-5">
       <div>
         <h1 className="text-2xl font-bold text-foreground flex items-center gap-2 mb-4">
-          <i className="pi pi-sitemap" style={{ color: "var(--color-primary)" }} /> Departmanlar
-          <span className="text-sm font-normal text-slate-400 ml-1">{depts.length} departman</span>
+          <i className="pi pi-sitemap" style={{ color: "var(--color-primary)" }} /> {t("labels.department")}
+          <span className="text-sm font-normal text-slate-400 ml-1">{depts.length} {t("labels.department")}</span>
         </h1>
         <div className="flex items-center justify-between gap-3">
           <AdminNav />
           <button onClick={() => { setShowCreate(true); setForm({ name: "", parentId: "" }); }}
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-white text-sm font-medium shrink-0" style={{ background: "var(--color-primary)" }}>
-            <i className="pi pi-plus" /> Yeni Departman
+            <i className="pi pi-plus" /> {t("forms.newDepartment")}
           </button>
         </div>
       </div>
@@ -92,7 +94,7 @@ export default function AdminDepartmentsPage() {
         <div className="text-center py-12 text-slate-400"><i className="pi pi-spin pi-spinner text-2xl" /></div>
       ) : (
         <div className="rounded-xl border border-border bg-white dark:bg-slate-900 divide-y divide-border">
-          {roots.length === 0 && <p className="px-5 py-8 text-center text-slate-400 text-sm">Henüz departman yok</p>}
+          {roots.length === 0 && <p className="px-5 py-8 text-center text-slate-400 text-sm">{t("labels.department")} {t("app.noData")}</p>}
           {roots.map((d) => (
             <div key={d.id}>
               <div className="flex items-center justify-between px-5 py-3.5 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
@@ -100,7 +102,7 @@ export default function AdminDepartmentsPage() {
                   <i className="pi pi-building text-slate-400" />
                   <div>
                     <p className="text-sm font-medium text-foreground">{d.name}</p>
-                    <p className="text-xs text-slate-400">{d._count.employees} çalışan</p>
+                    <p className="text-xs text-slate-400">{d._count.employees} {t("employees.title")}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
@@ -114,7 +116,7 @@ export default function AdminDepartmentsPage() {
                   <div className="flex items-center gap-2">
                     <i className="pi pi-arrow-right text-slate-300 text-xs" />
                     <p className="text-sm text-foreground">{c.name}</p>
-                    <span className="text-xs text-slate-400">{c._count.employees} çalışan</span>
+                    <span className="text-xs text-slate-400">{c._count.employees} {t("employees.title")}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <button onClick={() => openEdit(c)} className="p-1.5 rounded hover:bg-slate-100 text-slate-500"><i className="pi pi-pencil text-xs" /></button>
@@ -131,26 +133,26 @@ export default function AdminDepartmentsPage() {
       {(showCreate || editDept) && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <form onSubmit={editDept ? handleUpdate : handleCreate} className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-sm p-6 space-y-4">
-            <h2 className="font-semibold text-foreground">{editDept ? "Departman Düzenle" : "Yeni Departman"}</h2>
+            <h2 className="font-semibold text-foreground">{editDept ? t("forms.editDepartment") : t("forms.newDepartment")}</h2>
             <div>
-              <label className="text-sm text-slate-600 mb-1 block">Departman Adı</label>
+              <label className="text-sm text-slate-600 mb-1 block">{t("labels.department")} {t("labels.name")}</label>
               <input type="text" required value={form.name} onChange={(e) => setForm(f => ({ ...f, name: e.target.value }))}
                 className="w-full px-3 py-2 rounded-lg border border-border bg-white dark:bg-slate-800 text-foreground text-sm focus:outline-none" />
             </div>
             <div>
-              <label className="text-sm text-slate-600 mb-1 block">Üst Departman (isteğe bağlı)</label>
+              <label className="text-sm text-slate-600 mb-1 block">{t("labels.department")} {t("app.optional")}</label>
               <select value={form.parentId} onChange={(e) => setForm(f => ({ ...f, parentId: e.target.value }))}
                 className="w-full px-3 py-2 rounded-lg border border-border bg-white dark:bg-slate-800 text-foreground text-sm focus:outline-none">
-                <option value="">— Ana departman —</option>
+                <option value="">— {t("labels.department")} —</option>
                 {depts.filter((d) => d.id !== editDept?.id && !d.parentId).map((d) => (
                   <option key={d.id} value={d.id}>{d.name}</option>
                 ))}
               </select>
             </div>
             <div className="flex gap-2 pt-1">
-              <button type="button" onClick={() => { setShowCreate(false); setEditDept(null); }} className="flex-1 py-2 rounded-lg border border-border text-sm">İptal</button>
+              <button type="button" onClick={() => { setShowCreate(false); setEditDept(null); }} className="flex-1 py-2 rounded-lg border border-border text-sm">{t("app.cancel")}</button>
               <button type="submit" disabled={saving} className="flex-1 py-2 rounded-lg text-white text-sm font-medium disabled:opacity-60" style={{ background: "var(--color-primary)" }}>
-                {saving ? <i className="pi pi-spin pi-spinner" /> : editDept ? "Kaydet" : "Oluştur"}
+                {saving ? <i className="pi pi-spin pi-spinner" /> : editDept ? t("app.save") : t("app.create")}
               </button>
             </div>
           </form>

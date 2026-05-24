@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import { AdminNav } from "@/components/admin/AdminNav";
 import { MODULE_GROUPS } from "@/lib/modules-data";
 import type { ModuleDef } from "@/lib/modules-data";
@@ -29,6 +30,7 @@ function permSet(perms: { permission: Permission }[]): Set<string> {
 }
 
 export default function AdminRolesPage() {
+  const t = useTranslations("common");
   const [roles, setRoles] = useState<RoleWithPerms[]>([]);
   const [selectedRole, setSelectedRole] = useState<RoleWithPerms | null>(null);
   const [matrix, setMatrix] = useState<Set<string>>(new Set());
@@ -92,7 +94,7 @@ export default function AdminRolesPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ permissions }),
     });
-    setSavedMsg("Kaydedildi ✓");
+    setSavedMsg(`${t("success.savedSuccessfully")} ✓`);
     setSaving(false);
     await load();
   }
@@ -115,7 +117,7 @@ export default function AdminRolesPage() {
   }
 
   async function deleteRole(id: string) {
-    if (!confirm("Bu rolü silmek istediğinize emin misiniz?")) return;
+    if (!confirm(t("confirmations.deleteRole"))) return;
     const r = await fetch(`/api/admin/roles/${id}`, { method: "DELETE" });
     const data = await r.json();
     if (!r.ok) { alert(data.error); return; }
@@ -127,13 +129,13 @@ export default function AdminRolesPage() {
     <div className="max-w-full mx-auto">
       <div className="mb-5">
         <h1 className="text-2xl font-bold text-foreground flex items-center gap-2 mb-4">
-          <i className="pi pi-shield" style={{ color: "var(--color-primary)" }} /> Rol Yönetimi
-          <span className="text-sm font-normal text-slate-400 ml-1">izin matrisi</span>
+          <i className="pi pi-shield" style={{ color: "var(--color-primary)" }} /> {t("forms.editRole")}
+          <span className="text-sm font-normal text-slate-400 ml-1">{t("table.filter")}</span>
         </h1>
         <div className="flex items-center justify-between gap-3">
           <AdminNav />
           <button onClick={() => setShowCreate(true)} className="flex items-center gap-2 px-4 py-2 rounded-lg text-white text-sm font-medium shrink-0" style={{ background: "var(--color-primary)" }}>
-            <i className="pi pi-plus" /> Yeni Rol
+            <i className="pi pi-plus" /> {t("forms.newRole")}
           </button>
         </div>
       </div>
@@ -148,7 +150,7 @@ export default function AdminRolesPage() {
               style={selectedRole?.id === role.id ? { background: "var(--color-primary)" } : {}}
             >
               <p className="font-medium">{role.name}</p>
-              <p className={`text-xs mt-0.5 ${selectedRole?.id === role.id ? "text-white/70" : "text-slate-400"}`}>{role._count.users} kullanıcı</p>
+              <p className={`text-xs mt-0.5 ${selectedRole?.id === role.id ? "text-white/70" : "text-slate-400"}`}>{role._count.users} {t("labels.users")}</p>
             </button>
           ))}
         </div>
@@ -159,7 +161,7 @@ export default function AdminRolesPage() {
             <div className="flex items-center justify-center h-64 text-slate-400 border border-dashed border-border rounded-xl">
               <div className="text-center">
                 <i className="pi pi-shield text-3xl mb-2" />
-                <p className="text-sm">Bir rol seçin</p>
+                <p className="text-sm">{t("forms.editRole")} {t("app.search")}</p>
               </div>
             </div>
           ) : (
@@ -167,7 +169,7 @@ export default function AdminRolesPage() {
               <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-slate-50 dark:bg-slate-800">
                 <div>
                   <span className="font-semibold text-foreground">{selectedRole.name}</span>
-                  <span className="text-xs text-slate-400 ml-2">{matrix.size} izin</span>
+                  <span className="text-xs text-slate-400 ml-2">{matrix.size} {t("sidebar.nav.admin")}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   {savedMsg && <span className="text-xs text-green-600">{savedMsg}</span>}
@@ -181,11 +183,11 @@ export default function AdminRolesPage() {
                 <table className="w-full text-xs">
                   <thead className="border-b border-border">
                     <tr>
-                      <th className="px-4 py-2.5 text-left font-medium text-slate-600 w-48">Modül</th>
+                      <th className="px-4 py-2.5 text-left font-medium text-slate-600 w-48">{t("sidebar.nav.admin")}</th>
                       {ACTIONS.map((a) => (
                         <th key={a.key} className="px-3 py-2.5 text-center font-medium text-slate-600 w-20">{a.label}</th>
                       ))}
-                      <th className="px-3 py-2.5 text-center font-medium text-slate-500 w-16">Tümü</th>
+                      <th className="px-3 py-2.5 text-center font-medium text-slate-500 w-16">{t("app.all")}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
@@ -234,13 +236,13 @@ export default function AdminRolesPage() {
       {showCreate && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <form onSubmit={createRole} className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-sm p-6 space-y-4">
-            <h2 className="font-semibold text-foreground">Yeni Rol</h2>
-            <input type="text" required value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Rol adı (ör: Muhasebe)"
+            <h2 className="font-semibold text-foreground">{t("forms.newRole")}</h2>
+            <input type="text" required value={newName} onChange={(e) => setNewName(e.target.value)} placeholder={t("placeholders.roleName")}
               className="w-full px-3 py-2 rounded-lg border border-border bg-white dark:bg-slate-800 text-foreground text-sm focus:outline-none" />
             <div className="flex gap-2">
-              <button type="button" onClick={() => setShowCreate(false)} className="flex-1 py-2 rounded-lg border border-border text-sm">İptal</button>
+              <button type="button" onClick={() => setShowCreate(false)} className="flex-1 py-2 rounded-lg border border-border text-sm">{t("app.cancel")}</button>
               <button type="submit" disabled={creating} className="flex-1 py-2 rounded-lg text-white text-sm font-medium disabled:opacity-60" style={{ background: "var(--color-primary)" }}>
-                {creating ? <i className="pi pi-spin pi-spinner" /> : "Oluştur"}
+                {creating ? <i className="pi pi-spin pi-spinner" /> : t("app.create")}
               </button>
             </div>
           </form>

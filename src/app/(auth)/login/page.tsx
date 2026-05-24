@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 
 export default function LoginPage() {
+  const t = useTranslations("auth");
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") ?? "/dashboard";
@@ -20,13 +22,13 @@ export default function LoginPage() {
   const [showPass, setShowPass] = useState(false);
 
   const urlError =
-    errorParam === "inactive" ? "Hesabınız devre dışı. Yöneticinize başvurun." :
-    errorParam === "CredentialsSignin" ? "E-posta veya şifre hatalı." : null;
+    errorParam === "inactive" ? t("accountInactive") :
+    errorParam === "CredentialsSignin" ? t("invalidCredentials") : null;
   const error = formError ?? urlError;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!email || !password) { setFormError("Lütfen tüm alanları doldurun."); return; }
+    if (!email || !password) { setFormError(t("fillAllFields")); return; }
     setLoading(true);
     setFormError(null);
 
@@ -62,7 +64,7 @@ export default function LoginPage() {
         <h2 className="text-3xl font-bold text-foreground">
           {isAdminMode ? "⚙️ Sistem Girişi" : "Hoş geldiniz"}
         </h2>
-        <p className="text-slate-500 mt-1">Hesabınıza giriş yapın</p>
+        <p className="text-slate-500 mt-1">{t("login")}</p>
       </div>
 
       {/* Error */}
@@ -76,7 +78,7 @@ export default function LoginPage() {
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-foreground mb-1.5">E-posta</label>
+          <label className="block text-sm font-medium text-foreground mb-1.5">{t("email")}</label>
           <div className="relative">
             <i className="pi pi-envelope absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm" />
             <input
@@ -93,7 +95,7 @@ export default function LoginPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-foreground mb-1.5">Şifre</label>
+          <label className="block text-sm font-medium text-foreground mb-1.5">{t("password")}</label>
           <div className="relative">
             <i className="pi pi-lock absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm" />
             <input
@@ -125,7 +127,7 @@ export default function LoginPage() {
             <span className="text-sm text-slate-500">Beni hatırla</span>
           </label>
           <button type="button" className="text-sm hover:underline" style={{ color: "var(--color-primary)" }}>
-            Şifremi unuttum
+            {t("forgotPassword")}
           </button>
         </div>
 
@@ -136,9 +138,9 @@ export default function LoginPage() {
           style={{ background: "var(--color-primary)" }}
         >
           {loading ? (
-            <><i className="pi pi-spin pi-spinner" /> Giriş yapılıyor...</>
+            <><i className="pi pi-spin pi-spinner" /> {t("login")}</>
           ) : (
-            <><i className="pi pi-sign-in" /> Giriş Yap</>
+            <><i className="pi pi-sign-in" /> {t("login")}</>
           )}
         </button>
       </form>

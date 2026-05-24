@@ -1,8 +1,14 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { CustomerTable } from "@/components/crm/CustomerTable";
 import type { CrmCustomer } from "@/lib/crm-types";
+
+export async function generateMetadata() {
+  const t = await getTranslations("common");
+  return { title: t("crm.customers") };
+}
 
 export default async function CrmCustomersPage() {
   const session = await auth();

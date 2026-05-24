@@ -34,7 +34,14 @@
     "of": "/{total}",
     "rows": "satır",
     "noData": "Kayıt bulunamadı",
-    "noResults": "Sonuç bulunamadı"
+    "noResults": "Sonuç bulunamadı",
+    "create": "Oluştur",
+    "downloadCsv": "CSV İndir",
+    "activate": "Aktifleştir",
+    "disable": "Devre Dışı",
+    "send": "Gönder",
+    "all": "Tümü",
+    "loading2": "Yükleniyor..."
   },
   "auth": {
     "login": "Giriş Yap",
@@ -52,7 +59,58 @@
     "passwordMinLength": "Şifre en az 8 karakter olmalıdır",
     "passwordMismatch": "Şifreler eşleşmiyor",
     "registrationSuccess": "Kayıt başarılı! Giriş yapabilirsiniz.",
-    "accountInactive": "Hesabınız aktif değil. Yöneticinize başvurun."
+    "accountInactive": "Hesabınız aktif değil. Yöneticinize başvurun.",
+    "registerTitle": "Hesap oluşturun",
+    "registerSubtitle": "Ücretsiz kaydolun, hemen başlayın",
+    "terms": "Kaydolarak {terms} ve {privacy} kabul etmiş olursunuz.",
+    "termsOfService": "Kullanım Koşulları",
+    "privacyPolicy": "Gizlilik Politikası",
+    "alreadyHaveAccount": "Zaten hesabınız var mı?",
+    "registerButton": "Kaydol ve Başla",
+    "creatingAccount": "Hesap oluşturuluyor...",
+    "placeholders": {
+      "name": "Ahmet Yılmaz",
+      "email": "ahmet@sirket.com",
+      "companyName": "Yılmaz A.Ş.",
+      "password": "En az 8 karakter",
+      "confirmPassword": "Şifreyi tekrar girin"
+    },
+    "fillAllFields": "Lütfen tüm alanları doldurun."
+  },
+  "notifications": {
+    "title": "Bildirimler",
+    "markAllRead": "Tümünü oku",
+    "all": "Tümü",
+    "noNotifications": "Bildirim yok"
+  },
+  "userMenu": {
+    "profile": "Profil",
+    "settings": "Ayarlar",
+    "logout": "Çıkış Yap",
+    "admin": "Yönetici",
+    "user": "Kullanıcı"
+  },
+  "header": {
+    "search": "Ara... (Alt+/)",
+    "toggleTheme": {
+      "light": "Açık tema",
+      "dark": "Koyu tema"
+    }
+  },
+  "sidebar": {
+    "appName": "ERP Sistemi",
+    "toggleSidebar": {
+      "open": "Kenar çubuğunu aç",
+      "close": "Kenar çubuğunu daralt"
+    },
+    "nav": {
+      "dashboard": "Ana Sayfa",
+      "admin": "Yönetim",
+      "superAdmin": "Super Admin",
+      "onboarding": "Kurulum Sihirbazı",
+      "help": "Yardım",
+      "notifications": "Bildirimler"
+    }
   },
   "modules": {
     "dashboard": "Dashboard",
@@ -81,19 +139,217 @@
     "fleet": "Filo",
     "fieldServices": "Saha Hizmetleri",
     "rent": "Kira",
-    "iot": "IoT",
-    "notifications": "Bildirimler",
-    "settings": "Ayarlar",
-    "help": "Yardım"
+    "iot": "IoT"
   },
-  "nav": {
-    "profile": "Profil",
+  "buttons": {
+    "create": "Oluştur",
+    "save": "Kaydet",
+    "edit": "Düzenle",
+    "delete": "Sil",
+    "downloadCsv": "CSV İndir",
+    "send": "Gönder",
+    "activate": "Aktifleştir",
+    "disable": "Devre Dışı",
+    "editDepartment": "Departman Düzenle",
+    "editWarehouse": "Depoyu Düzenle",
+    "editEquipment": "Ekipmanı Düzenle",
+    "editLine": "Hattı Düzenle",
+    "editMaterial": "Malzemeyi Düzenle",
+    "editMethod": "Metotu Düzenle",
+    "createCustomer": "Müşteri Oluştur",
+    "editPlan": "Planı Düzenle",
+    "editProject": "Projeyi Düzenle",
+    "createOrder": "Siparişi Oluştur",
+    "editStandard": "Standardı Düzenle",
+    "editEmployee": "Çalışanı Düzenle",
+    "editItem": "Öğeyi Düzenle",
+    "createProductionOrder": "Üretim Emri Oluştur",
+    "createTask": "Görev Oluştur",
+    "sendNotification": "Bildirim Gönder"
+  },
+  "confirmations": {
+    "deleteCustomer": "Bu müşteriyi silmek istiyor musunuz?",
+    "deleteProductionOrder": "Bu üretim emrini silmek istiyor musunuz?",
+    "deleteProduct": "Bu ürünü silmek istiyor musunuz?",
+    "deleteOrder": "Siparişi silmek istiyor musunuz?",
+    "deleteApiKey": "API anahtarını iptal etmek istiyor musunuz?",
+    "deleteVehicle": "Aracı silmek istiyor musunuz?",
+    "deleteMaintenancePlan": "Bu bakım planını silmek istiyor musunuz?",
+    "deleteDepartment": "Bu departmanı silmek istiyor musunuz?",
+    "deleteLineDescription": "Bu hattı silmek istiyor musunuz?",
+    "deleteEquipment": "Bu ekipmanı silmek istiyor musunuz?",
+    "deleteMaterial": "Bu malzemeyi silmek istiyor musunuz?",
+    "deleteRole": "Bu rolü silmek istiyor musunuz?",
+    "deleteUser": "Bu kullanıcıyı silmek istiyor musunuz?",
+    "deleteExpense": "Bu masrafı silmek istiyor musunuz?",
+    "deleteLeaveRequest": "İzin talebini silmek istiyor musunuz?",
+    "deleteVirtualSale": "Bu sanal satışı silmek istiyor musunuz?",
+    "deleteTask": "Bu görevi silmek istiyor musunuz?",
+    "deleteRoute": "Bu güzergahı silmek istiyor musunuz?",
+    "deleteIoTDevice": "Bu IoT cihazını silmek istiyor musunuz?"
+  },
+  "errors": {
+    "notFound": "Bulunamadı",
+    "tenantNotFound": "Tenant bulunamadı",
+    "roleNotFound": "Rol bulunamadı",
+    "departmentNotFound": "Departman bulunamadı",
+    "userNotFound": "Kullanıcı bulunamadı",
+    "unauthorized": "Yetkisiz erişim",
+    "forbidden": "Bu işlem için yetkiniz bulunmuyor",
+    "serverError": "Sunucu hatası oluştu",
+    "moduleInactive": "Bu modül aktif değil",
+    "quotaExceeded": "Limitinize ulaştınız. Yöneticinize başvurun.",
+    "networkError": "Bağlantı hatası. Çevrimdışı modda çalışıyorsunuz.",
+    "fillAllFields": "Lütfen tüm alanları doldurun.",
+    "errorOccurred": "Hata oluştu",
+    "validationError": "Doğrulama hatası",
+    "emptyField": "Bu alan boş olamaz"
+  },
+  "labels": {
+    "created": "Oluşturulma",
+    "completed": "Tamamlandı",
+    "cancelled": "İptal",
+    "users": "Kullanıcılar",
+    "customers": "Müşteriler",
+    "type": "Tür",
+    "customer": "Müşteri",
+    "product": "Ürün",
+    "city": "Şehir",
+    "country": "Ülke",
+    "orderNumber": "Sipariş No",
+    "createdAt": "Oluşturulma Tarihi",
+    "updatedAt": "Güncellenme Tarihi",
+    "status": "Durum",
+    "department": "Departman",
+    "position": "Pozisyon",
+    "salary": "Maaş",
+    "manager": "Yönetici",
+    "hireDate": "İşe Giriş Tarihi",
+    "email": "E-posta",
+    "phone": "Telefon",
+    "address": "Adres",
+    "quantity": "Miktar",
+    "price": "Fiyat",
+    "total": "Toplam",
+    "description": "Açıklama",
+    "notes": "Notlar",
+    "equipment": "Ekipman",
+    "warehouse": "Depo",
+    "location": "Konum",
+    "code": "Kod",
+    "name": "Ad",
+    "noEquipmentAdded": "Henüz ekipman eklenmedi"
+  },
+  "placeholders": {
+    "searchProduct": "Ürün ara…",
+    "searchEquipment": "Ekipman adı veya kod ara…",
+    "searchMaterial": "Malzeme adı veya kod ara…",
+    "roleName": "Rol adı (ör: Muhasebe)",
+    "enterDetails": "Detayları girin...",
+    "enterNote": "Not girin...",
+    "selectOption": "Seçiniz..."
+  },
+  "titles": {
+    "crm": "CRM — Müşteri İlişkileri",
+    "sales": "Satış Yönetimi",
+    "production": "Üretim Emirleri",
+    "humanResources": "İnsan Kaynakları",
+    "dashboard": "Dashboard",
     "settings": "Ayarlar",
-    "logout": "Çıkış Yap",
-    "theme": "Tema",
-    "light": "Açık",
-    "dark": "Koyu",
-    "language": "Dil"
+    "profile": "Profil"
+  },
+  "status": {
+    "completed": "Tamamlandı",
+    "open": "Açık",
+    "closed": "Kapalı",
+    "pending": "Beklemede",
+    "approved": "Onaylandı",
+    "rejected": "Reddedildi",
+    "draft": "Taslak",
+    "active": "Aktif",
+    "inactive": "Pasif"
+  },
+  "success": {
+    "setupCompleted": "Kurulum tamamlandı.",
+    "operationCompleted": "İşlem tamamlandı.",
+    "savedSuccessfully": "Başarıyla kaydedildi.",
+    "deletedSuccessfully": "Başarıyla silindi.",
+    "createdSuccessfully": "Başarıyla oluşturuldu."
+  },
+  "validation": {
+    "required": "Bu alan zorunludur",
+    "email": "Geçerli bir e-posta adresi girin",
+    "minLength": "En az {min} karakter olmalıdır",
+    "maxLength": "En fazla {max} karakter olmalıdır",
+    "number": "Sayı girin",
+    "positive": "Pozitif bir sayı girin"
+  },
+  "shortcuts": {
+    "hint": "Klavye Kısayolları",
+    "altKey": "Alt + ? kısayol listesini açar",
+    "modules": {
+      "crm": "C",
+      "sales": "S",
+      "production": "U",
+      "employees": "P",
+      "inventory": "E",
+      "dashboard": "H",
+      "notifications": "N",
+      "settings": "A"
+    },
+    "global": {
+      "commandPalette": "Alt + K",
+      "search": "Alt + /",
+      "toggleTheme": "Alt + D",
+      "newTab": "Alt + T",
+      "closeTab": "Alt + W"
+    },
+    "form": {
+      "submit": "Alt + Enter",
+      "cancel": "Escape"
+    }
+  },
+  "quota": {
+    "limitReached": "Limit doldu",
+    "remaining": "Kalan: {remaining}/{max}",
+    "unlimited": "Sınırsız"
+  },
+  "audit": {
+    "title": "Denetim Kaydı",
+    "action": "İşlem",
+    "module": "Modül",
+    "user": "Kullanıcı",
+    "date": "Tarih",
+    "actions": {
+      "create": "Oluşturuldu",
+      "update": "Güncellendi",
+      "delete": "Silindi",
+      "login": "Giriş yapıldı",
+      "export": "Dışa aktarıldı"
+    }
+  },
+  "forms": {
+    "newDepartment": "Yeni Departman",
+    "editDepartment": "Departman Düzenle",
+    "newRole": "Yeni Rol",
+    "editRole": "Rol Düzenle",
+    "newUser": "Yeni Kullanıcı",
+    "editUser": "Kullanıcı Düzenle",
+    "newCustomer": "Yeni Müşteri",
+    "editCustomer": "Müşteri Düzenle",
+    "newProduct": "Yeni Ürün",
+    "editProduct": "Ürün Düzenle",
+    "newOrder": "Yeni Sipariş",
+    "editOrder": "Sipariş Düzenle",
+    "newExpense": "Yeni Masraf",
+    "editExpense": "Masraf Düzenle",
+    "newLeaveRequest": "Yeni İzin Talebi",
+    "newTask": "Yeni Görev",
+    "editTask": "Görev Düzenle",
+    "newRoute": "Yeni Güzergah",
+    "editRoute": "Güzergah Düzenle",
+    "newApiKey": "Yeni API Anahtarı",
+    "newIoTDevice": "Yeni IoT Cihazı"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -157,57 +413,40 @@
       "cancelled": "İptal Edildi"
     }
   },
-  "errors": {
-    "notFound": "Sayfa bulunamadı",
-    "unauthorized": "Bu sayfaya erişim yetkiniz yok",
-    "forbidden": "Bu işlem için yetkiniz bulunmuyor",
-    "serverError": "Sunucu hatası oluştu",
-    "moduleInactive": "Bu modül aktif değil",
-    "quotaExceeded": "Limitinize ulaştınız. Yöneticinize başvurun.",
-    "networkError": "Bağlantı hatası. Çevrimdışı modda çalışıyorsunuz."
+   "pagination": {
+     "of": "/{total}",
+     "rows": "satır",
+     "rowsPerPage": "Sayfa başına satır",
+     "showing": "Gösterilen",
+     "to": "-",
+     "total": "Toplam"
+   },
+   "employees": {
+     "title": "Çalışanlar"
+   },
+  "table": {
+    "noData": "Veri bulunamadı",
+    "noResults": "Sonuç bulunamadı",
+    "search": "Ara...",
+    "filter": "Filtrele",
+    "sort": "Sırala",
+    "actions": "İşlemler"
   },
-  "shortcuts": {
-    "hint": "Klavye Kısayolları",
-    "altKey": "Alt + ? kısayol listesini açar",
-    "modules": {
-      "crm": "C",
-      "sales": "S",
-      "production": "U",
-      "employees": "P",
-      "inventory": "E",
-      "dashboard": "H",
-      "notifications": "N",
-      "settings": "A"
-    },
-    "global": {
-      "commandPalette": "Alt + K",
-      "search": "Alt + /",
-      "toggleTheme": "Alt + D",
-      "newTab": "Alt + T",
-      "closeTab": "Alt + W"
-    },
-    "form": {
-      "submit": "Alt + Enter",
-      "cancel": "Escape"
-    }
-  },
-  "quota": {
-    "limitReached": "Limit doldu",
-    "remaining": "Kalan: {remaining}/{max}",
-    "unlimited": "Sınırsız"
-  },
-  "audit": {
-    "title": "Denetim Kaydı",
-    "action": "İşlem",
-    "module": "Modül",
-    "user": "Kullanıcı",
-    "date": "Tarih",
-    "actions": {
-      "create": "Oluşturuldu",
-      "update": "Güncellendi",
-      "delete": "Silindi",
-      "login": "Giriş yapıldı",
-      "export": "Dışa aktarıldı"
-    }
-  }
-}
+   "setup": {
+     "permissions": "Yetkiler hazırlanıyor",
+     "rolePermissions": "Roller atanıyor",
+     "tenantModules": "Modüller yapılandırılıyor",
+     "quotas": "Kotalar ekleniyor",
+     "mockData": "Örnek veriler yükleniyor",
+     "accountReady": "Hesabınız hazırlandı",
+     "setupDescription": "Şimdi yeni hesabınıza ait ön ayarlar ve örnek veriler hazırlanıyor. Bu ekranda adım adım ilerleme göreceksiniz.",
+     "progress": "İlerleme: {percent}%",
+     "setupCompleted": "Kurulum tamamlandı.",
+     "completed": "Tamamlandı",
+     "inProgress": "Devam ediyor",
+     "error": "Hata oluştu",
+     "pending": "Beklemede",
+     "setupError": "Kurulum sırasında bir hata oluştu",
+     "readyDescription": "Hazırlık tamamlandı. Kısa süre sonra dashboard'a yönlendirileceksiniz."
+   }
+ }

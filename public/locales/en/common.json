@@ -30,11 +30,17 @@
     "status": "Status",
     "date": "Date",
     "actions": "Actions",
-    "total": "/{total}",
+    "total": "Total",
     "of": "of",
     "rows": "rows",
     "noData": "No records found",
-    "noResults": "No results found"
+    "noResults": "No results found",
+    "create": "Create",
+    "downloadCsv": "Download CSV",
+    "activate": "Activate",
+    "disable": "Disable",
+    "send": "Send",
+    "all": "All"
   },
   "auth": {
     "login": "Sign In",
@@ -52,7 +58,58 @@
     "passwordMinLength": "Password must be at least 8 characters",
     "passwordMismatch": "Passwords do not match",
     "registrationSuccess": "Registration successful! You can now sign in.",
-    "accountInactive": "Your account is inactive. Please contact your administrator."
+    "accountInactive": "Your account is inactive. Please contact your administrator.",
+    "registerTitle": "Create your account",
+    "registerSubtitle": "Sign up for free, get started right now",
+    "terms": "By signing up, you agree to our {terms} and {privacy}.",
+    "termsOfService": "Terms of Service",
+    "privacyPolicy": "Privacy Policy",
+    "alreadyHaveAccount": "Already have an account?",
+    "registerButton": "Sign Up and Start",
+    "creatingAccount": "Creating account...",
+    "placeholders": {
+      "name": "John Doe",
+      "email": "john@company.com",
+      "companyName": "Acme Corp",
+      "password": "At least 8 characters",
+      "confirmPassword": "Re-enter password"
+    },
+    "fillAllFields": "Please fill in all fields."
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAllRead": "Mark all as read",
+    "all": "All",
+    "noNotifications": "No notifications"
+  },
+  "userMenu": {
+    "profile": "Profile",
+    "settings": "Settings",
+    "logout": "Sign Out",
+    "admin": "Administrator",
+    "user": "User"
+  },
+  "header": {
+    "search": "Search... (Alt+/)",
+    "toggleTheme": {
+      "light": "Light theme",
+      "dark": "Dark theme"
+    }
+  },
+  "sidebar": {
+    "appName": "ERP System",
+    "toggleSidebar": {
+      "open": "Open sidebar",
+      "close": "Close sidebar"
+    },
+    "nav": {
+      "dashboard": "Dashboard",
+      "admin": "Administration",
+      "superAdmin": "Super Admin",
+      "onboarding": "Setup Wizard",
+      "help": "Help",
+      "notifications": "Notifications"
+    }
   },
   "modules": {
     "dashboard": "Dashboard",
@@ -74,34 +131,330 @@
     "recruitment": "Recruitment",
     "leave": "Leave",
     "project": "Project Management",
-    "tasks": "Task Management",
+    "tasks": "Tasks",
     "processTracking": "Process Tracking",
     "serviceRoutes": "Service Routes",
     "expenses": "Expenses",
     "fleet": "Fleet",
     "fieldServices": "Field Services",
-    "rent": "Rent",
+    "rent": "Rental",
     "iot": "IoT",
     "notifications": "Notifications",
     "settings": "Settings",
     "help": "Help"
   },
-  "nav": {
-    "profile": "Profile",
-    "settings": "Settings",
-    "logout": "Sign Out",
-    "theme": "Theme",
-    "light": "Light",
-    "dark": "Dark",
-    "language": "Language"
+  "buttons": {
+    "create": "Create",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "downloadCsv": "Download CSV",
+    "send": "Send",
+    "activate": "Activate",
+    "disable": "Disable",
+    "editDepartment": "Edit Department",
+    "editWarehouse": "Edit Warehouse",
+    "editEquipment": "Edit Equipment",
+    "editLine": "Edit Line",
+    "editMaterial": "Edit Material",
+    "editMethod": "Edit Method",
+    "createCustomer": "Create Customer",
+    "editPlan": "Edit Plan",
+    "editProject": "Edit Project",
+    "createOrder": "Create Order",
+    "editStandard": "Edit Standard",
+    "editEmployee": "Edit Employee",
+    "editItem": "Edit Item",
+    "createProductionOrder": "Create Production Order",
+    "createTask": "Create Task",
+    "sendNotification": "Send Notification"
+  },
+  "confirmations": {
+    "deleteCustomer": "Are you sure you want to delete this customer?",
+    "deleteProductionOrder": "Are you sure you want to delete this production order?",
+    "deleteProduct": "Are you sure you want to delete this product?",
+    "deleteOrder": "Are you sure you want to delete this order?",
+    "deleteApiKey": "Are you sure you want to revoke this API key?",
+    "deleteVehicle": "Are you sure you want to delete this vehicle?",
+    "deleteMaintenancePlan": "Are you sure you want to delete this maintenance plan?",
+    "deleteDepartment": "Are you sure you want to delete this department?",
+    "deleteLineDescription": "Are you sure you want to delete this line?",
+    "deleteEquipment": "Are you sure you want to delete this equipment?",
+    "deleteMaterial": "Are you sure you want to delete this material?",
+    "deleteRole": "Are you sure you want to delete this role?",
+    "deleteUser": "Are you sure you want to delete this user?",
+    "deleteExpense": "Are you sure you want to delete this expense?",
+    "deleteLeaveRequest": "Are you sure you want to delete this leave request?",
+    "deleteVirtualSale": "Are you sure you want to delete this virtual sale?",
+    "deleteTask": "Are you sure you want to delete this task?",
+    "deleteRoute": "Are you sure you want to delete this route?",
+    "deleteIoTDevice": "Are you sure you want to delete this IoT device?"
   },
   "errors": {
-    "notFound": "Page not found",
-    "unauthorized": "You don't have access to this page",
+    "notFound": "Not found",
+    "tenantNotFound": "Tenant not found",
+    "roleNotFound": "Role not found",
+    "departmentNotFound": "Department not found",
+    "userNotFound": "User not found",
+    "unauthorized": "Unauthorized access",
     "forbidden": "You don't have permission for this action",
     "serverError": "A server error occurred",
     "moduleInactive": "This module is not active",
     "quotaExceeded": "You've reached your limit. Please contact your administrator.",
-    "networkError": "Connection error. You are working offline."
+    "networkError": "Connection error. You are working offline.",
+    "fillAllFields": "Please fill in all fields.",
+    "errorOccurred": "An error occurred",
+    "validationError": "Validation error",
+    "emptyField": "This field cannot be empty"
+  },
+  "labels": {
+    "created": "Created",
+    "completed": "Completed",
+    "cancelled": "Cancelled",
+    "users": "Users",
+    "customers": "Customers",
+    "type": "Type",
+    "customer": "Customer",
+    "product": "Product",
+    "city": "City",
+    "country": "Country",
+    "orderNumber": "Order Number",
+    "createdAt": "Created At",
+    "updatedAt": "Updated At",
+    "status": "Status",
+    "department": "Department",
+    "position": "Position",
+    "salary": "Salary",
+    "manager": "Manager",
+    "hireDate": "Hire Date",
+    "email": "Email",
+    "phone": "Phone",
+    "address": "Address",
+    "quantity": "Quantity",
+    "price": "Price",
+    "total": "Total",
+    "description": "Description",
+    "notes": "Notes",
+    "equipment": "Equipment",
+    "warehouse": "Warehouse",
+    "location": "Location",
+    "code": "Code",
+    "name": "Name",
+    "noEquipmentAdded": "No equipment added yet"
+  },
+  "placeholders": {
+    "searchProduct": "Search products…",
+    "searchEquipment": "Search by equipment name or code…",
+    "searchMaterial": "Search by material name or code…",
+    "roleName": "Role name (e.g. Accounting)",
+    "enterDetails": "Enter details...",
+    "enterNote": "Enter note...",
+    "selectOption": "Select..."
+  },
+  "titles": {
+    "crm": "CRM — Customer Relations",
+    "sales": "Sales Management",
+    "production": "Production Orders",
+    "humanResources": "Human Resources",
+    "dashboard": "Dashboard",
+    "settings": "Settings",
+    "profile": "Profile"
+  },
+  "status": {
+    "completed": "Completed",
+    "open": "Open",
+    "closed": "Closed",
+    "pending": "Pending",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "draft": "Draft",
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "success": {
+    "setupCompleted": "Setup completed.",
+    "operationCompleted": "Operation completed.",
+    "savedSuccessfully": "Saved successfully.",
+    "deletedSuccessfully": "Deleted successfully.",
+    "createdSuccessfully": "Created successfully."
+  },
+  "validation": {
+    "required": "This field is required",
+    "email": "Please enter a valid email address",
+    "minLength": "Must be at least {min} characters",
+    "maxLength": "Must be no more than {max} characters",
+    "number": "Please enter a number",
+    "positive": "Please enter a positive number"
+  },
+  "shortcuts": {
+    "hint": "Keyboard Shortcuts",
+    "altKey": "Alt + ? opens the shortcuts list",
+    "modules": {
+      "crm": "C",
+      "sales": "S",
+      "production": "U",
+      "employees": "P",
+      "inventory": "E",
+      "dashboard": "H",
+      "notifications": "N",
+      "settings": "A"
+    },
+    "global": {
+      "commandPalette": "Alt + K",
+      "search": "Alt + /",
+      "toggleTheme": "Alt + D",
+      "newTab": "Alt + T",
+      "closeTab": "Alt + W"
+    },
+    "form": {
+      "submit": "Alt + Enter",
+      "cancel": "Escape"
+    }
+  },
+  "quota": {
+    "limitReached": "Limit reached",
+    "remaining": "Remaining: {remaining}/{max}",
+    "unlimited": "Unlimited"
+  },
+  "audit": {
+    "title": "Audit Log",
+    "action": "Action",
+    "module": "Module",
+    "user": "User",
+    "date": "Date",
+    "actions": {
+      "create": "Created",
+      "update": "Updated",
+      "delete": "Deleted",
+      "login": "Logged in",
+      "export": "Exported"
+    }
+  },
+  "forms": {
+    "newDepartment": "New Department",
+    "editDepartment": "Edit Department",
+    "newRole": "New Role",
+    "editRole": "Edit Role",
+    "newUser": "New User",
+    "editUser": "Edit User",
+    "newCustomer": "New Customer",
+    "editCustomer": "Edit Customer",
+    "newProduct": "New Product",
+    "editProduct": "Edit Product",
+    "newOrder": "New Order",
+    "editOrder": "Edit Order",
+    "newExpense": "New Expense",
+    "editExpense": "Edit Expense",
+    "newLeaveRequest": "New Leave Request",
+    "newTask": "New Task",
+    "editTask": "Edit Task",
+    "newRoute": "New Route",
+    "editRoute": "Edit Route",
+    "newApiKey": "New API Key",
+    "newIoTDevice": "New IoT Device"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "addWidget": "Add Widget",
+    "editWidget": "Edit Widget",
+    "deleteWidget": "Delete Widget",
+    "noWidgets": "No widgets added yet. Add a widget to get started.",
+    "widgetTypes": {
+      "stat": "Statistics",
+      "chart": "Chart",
+      "table": "Table",
+      "list": "List"
+    }
+  },
+  "crm": {
+    "title": "CRM",
+    "customers": "Customers",
+    "newCustomer": "New Customer",
+    "customerDetail": "Customer Details",
+    "pipeline": "Pipeline",
+    "contacts": "Contacts",
+    "interactions": "Interactions",
+    "customerType": {
+      "individual": "Individual",
+      "corporate": "Corporate"
+    },
+    "pipelineStage": {
+      "lead": "Lead",
+      "prospect": "Prospect",
+      "customer": "Customer",
+      "active": "Active"
+    }
+  },
+  "employees": {
+    "title": "Employees",
+    "newEmployee": "New Employee",
+    "employeeDetail": "Employee Details",
+    "employeeId": "Employee ID",
+    "department": "Department",
+    "position": "Position",
+    "salary": "Salary",
+    "manager": "Manager",
+    "hireDate": "Hire Date"
+  },
+  "leave": {
+    "title": "Leave Management",
+    "newRequest": "New Leave Request",
+    "myRequests": "My Requests",
+    "teamRequests": "Team Requests",
+    "balance": "Leave Balance",
+    "types": {
+      "annual": "Annual Leave",
+      "sick": "Sick Leave",
+      "excused": "Excused Absence",
+      "unpaid": "Unpaid Leave"
+    },
+    "status": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "cancelled": "Cancelled"
+    }
+  },
+  "pagination": {
+    "of": "of",
+    "rows": "rows",
+    "rowsPerPage": "Rows per page",
+    "showing": "Showing",
+    "to": "to",
+    "total": "Total"
+  },
+  "table": {
+    "noData": "No data available",
+    "noResults": "No results found",
+    "search": "Search...",
+    "filter": "Filter",
+    "sort": "Sort",
+    "actions": "Actions"
+  },
+  "setup": {
+    "permissions": "Preparing permissions",
+    "rolePermissions": "Assigning roles",
+    "tenantModules": "Configuring modules",
+    "quotas": "Adding quotas",
+    "mockData": "Loading sample data",
+    "accountReady": "Your account is ready",
+    "setupDescription": "Your account settings and sample data are being prepared. You'll see the progress step by step below.",
+    "progress": "Progress: {percent}%",
+    "setupCompleted": "Setup completed.",
+    "completed": "Completed",
+    "inProgress": "In progress",
+    "error": "Error occurred",
+    "pending": "Pending",
+    "setupError": "An error occurred during setup",
+    "readyDescription": "Setup is complete. You will be redirected to the dashboard shortly."
+  },
+  "common": {
+    "and": "and",
+    "or": "or",
+    "loading": "Loading...",
+    "error": "Error",
+    "warning": "Warning",
+    "success": "Success",
+    "info": "Information"
   }
 }

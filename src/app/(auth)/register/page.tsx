@@ -4,8 +4,10 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 export default function RegisterPage() {
+  const t = useTranslations("auth");
   const router = useRouter();
   const [form, setForm] = useState({
     name: "", email: "", password: "", confirmPassword: "", companyName: "",
@@ -27,10 +29,10 @@ export default function RegisterPage() {
       setError("Lütfen tüm alanları doldurun."); return;
     }
     if (form.password !== form.confirmPassword) {
-      setError("Şifreler eşleşmiyor."); return;
+      setError(t("passwordMismatch")); return;
     }
     if (form.password.length < 8) {
-      setError("Şifre en az 8 karakter olmalıdır."); return;
+      setError(t("passwordMinLength")); return;
     }
 
     setLoading(true);
@@ -49,7 +51,6 @@ export default function RegisterPage() {
       const data = await res.json();
       if (!res.ok) { setError(data.error ?? "Kayıt başarısız."); setLoading(false); return; }
 
-      // Auto sign-in
       const result = await signIn("credentials", {
         email: form.email,
         password: form.password,
@@ -69,9 +70,9 @@ export default function RegisterPage() {
   }
 
   const fields = [
-    { key: "name" as const, label: "Ad Soyad", placeholder: "Ahmet Yılmaz", icon: "pi-user", type: "text" },
-    { key: "email" as const, label: "E-posta", placeholder: "ahmet@sirket.com", icon: "pi-envelope", type: "email" },
-    { key: "companyName" as const, label: "Şirket Adı", placeholder: "Yılmaz A.Ş.", icon: "pi-building", type: "text" },
+    { key: "name" as const, label: t("name"), placeholder: t("placeholders.name"), icon: "pi-user", type: "text" },
+    { key: "email" as const, label: t("email"), placeholder: t("placeholders.email"), icon: "pi-envelope", type: "email" },
+    { key: "companyName" as const, label: t("companyName"), placeholder: t("placeholders.companyName"), icon: "pi-building", type: "text" },
   ];
 
   return (
@@ -86,8 +87,8 @@ export default function RegisterPage() {
           </div>
           <span className="text-xl font-bold">ERP Sistemi</span>
         </div>
-        <h2 className="text-3xl font-bold text-foreground">Hesap oluşturun</h2>
-        <p className="text-slate-500 mt-1">Ücretsiz kaydolun, hemen başlayın</p>
+        <h2 className="text-3xl font-bold text-foreground">{t("registerTitle")}</h2>
+        <p className="text-slate-500 mt-1">{t("registerSubtitle")}</p>
       </div>
 
       {error && (
@@ -116,14 +117,14 @@ export default function RegisterPage() {
         ))}
 
         <div>
-          <label className="block text-sm font-medium text-foreground mb-1.5">Şifre</label>
+          <label className="block text-sm font-medium text-foreground mb-1.5">{t("password")}</label>
           <div className="relative">
             <i className="pi pi-lock absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm" />
             <input
               type={showPass ? "text" : "password"}
               value={form.password}
               onChange={setField("password")}
-              placeholder="En az 8 karakter"
+              placeholder={t("placeholders.password")}
               autoComplete="new-password"
               className="w-full pl-9 pr-10 py-2.5 rounded-lg border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:border-transparent transition"
             />
@@ -138,14 +139,14 @@ export default function RegisterPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-foreground mb-1.5">Şifre Tekrar</label>
+          <label className="block text-sm font-medium text-foreground mb-1.5">{t("confirmPassword")}</label>
           <div className="relative">
             <i className="pi pi-lock absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm" />
             <input
               type={showPass ? "text" : "password"}
               value={form.confirmPassword}
               onChange={setField("confirmPassword")}
-              placeholder="Şifreyi tekrar girin"
+              placeholder={t("placeholders.confirmPassword")}
               autoComplete="new-password"
               className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:border-transparent transition"
             />
@@ -159,25 +160,24 @@ export default function RegisterPage() {
           style={{ background: "var(--color-primary)" }}
         >
           {loading ? (
-            <><i className="pi pi-spin pi-spinner" /> Hesap oluşturuluyor...</>
+            <><i className="pi pi-spin pi-spinner" /> {t("creatingAccount")}</>
           ) : (
-            <><i className="pi pi-user-plus" /> Kaydol ve Başla</>
+            <><i className="pi pi-user-plus" /> {t("registerButton")}</>
           )}
         </button>
 
         <p className="text-xs text-slate-400 text-center">
-          Kaydolarak{" "}
-          <span className="underline cursor-pointer" style={{ color: "var(--color-primary)" }}>Kullanım Koşulları</span>
-          {" "}ve{" "}
-          <span className="underline cursor-pointer" style={{ color: "var(--color-primary)" }}>Gizlilik Politikası</span>
-          &apos;nı kabul etmiş olursunuz.
+          {t.rich("terms", {
+            terms: (chunks) => <span className="underline cursor-pointer" style={{ color: "var(--color-primary)" }}>{t("termsOfService")}</span>,
+            privacy: (chunks) => <span className="underline cursor-pointer" style={{ color: "var(--color-primary)" }}>{t("privacyPolicy")}</span>,
+          })}
         </p>
       </form>
 
       <p className="mt-6 text-center text-sm text-slate-500">
-        Zaten hesabınız var mı?{" "}
+        {t("alreadyHaveAccount")}{" "}
         <Link href="/login" className="font-medium hover:underline" style={{ color: "var(--color-primary)" }}>
-          Giriş yapın
+          {t("login")}
         </Link>
       </p>
     </div>

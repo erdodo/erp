@@ -9,7 +9,10 @@ import { MODULE_GROUPS } from "@/lib/modules-data";
 import { ShortcutHint } from "@/components/ui/ShortcutHint";
 import { useSession } from "next-auth/react";
 
+import { useTranslations } from "next-intl";
+
 export function Sidebar() {
+  const t = useTranslations();
   const pathname = usePathname();
   const { modules } = useActiveModules();
   const { sidebarCollapsed, toggleSidebar } = useThemeStore();
@@ -35,7 +38,7 @@ export function Sidebar() {
         {collapsed ? (
           <button
             onClick={toggleSidebar}
-            title="Kenar çubuğunu aç"
+            title={t("sidebar.toggleSidebar.open")}
             className="w-16 self-stretch flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
           >
             <i className="pi pi-chevron-right text-sm" />
@@ -48,10 +51,10 @@ export function Sidebar() {
             >
               <i className="pi pi-sitemap text-white text-sm" />
             </div>
-            <span className="font-bold text-base truncate flex-1">ERP Sistemi</span>
+            <span className="font-bold text-base truncate flex-1">{t("sidebar.appName")}</span>
             <button
               onClick={toggleSidebar}
-              title="Kenar çubuğunu daralt"
+              title={t("sidebar.toggleSidebar.close")}
               className="text-slate-400 hover:text-slate-600 transition p-1 shrink-0"
             >
               <i className="pi pi-chevron-left text-xs" />
@@ -66,7 +69,7 @@ export function Sidebar() {
         <NavItem
           href="/dashboard"
           icon="pi-home"
-          label="Ana Sayfa"
+          label={t("sidebar.nav.dashboard")}
           shortcut="H"
           active={pathname === "/dashboard"}
           collapsed={collapsed}
@@ -103,10 +106,10 @@ export function Sidebar() {
           <div className="mt-3">
             {!collapsed && (
               <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-widest text-slate-400 select-none">
-                Yönetim
+                {t("sidebar.nav.admin")}
               </p>
             )}
-            <NavItem href="/dashboard/admin/settings" icon="pi-cog" label="Ayarlar" shortcut="AS" active={pathname.startsWith("/dashboard/admin")} collapsed={collapsed} />
+            <NavItem href="/dashboard/admin/settings" icon="pi-cog" label={t("sidebar.nav.admin")} shortcut="AS" active={pathname.startsWith("/dashboard/admin")} collapsed={collapsed} />
           </div>
         )}
 
@@ -115,19 +118,19 @@ export function Sidebar() {
           <div className="mt-3">
             {!collapsed && (
               <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-widest text-amber-500 select-none">
-                Super Admin
+                {t("sidebar.nav.superAdmin")}
               </p>
             )}
-            <NavItem href="/dashboard/superadmin" icon="pi-shield" label="SuperAdmin" shortcut="SA" active={pathname.startsWith("/dashboard/superadmin")} collapsed={collapsed} />
+            <NavItem href="/dashboard/superadmin" icon="pi-shield" label={t("sidebar.nav.superAdmin")} shortcut="SA" active={pathname.startsWith("/dashboard/superadmin")} collapsed={collapsed} />
           </div>
         )}
       </nav>
 
       {/* Bottom */}
       <div className="border-t border-border p-2 shrink-0 space-y-0.5">
-        <NavItem href="/dashboard/onboarding" icon="pi-sparkles" label="Kurulum Sihirbazı" shortcut="OB" active={pathname.startsWith("/dashboard/onboarding")} collapsed={collapsed} />
-        <NavItem href="/dashboard/help" icon="pi-question-circle" label="Yardım" shortcut="HE" active={pathname.startsWith("/dashboard/help")} collapsed={collapsed} />
-        <NavItem href="/dashboard/notifications" icon="pi-bell" label="Bildirimler" shortcut="NB" active={pathname.startsWith("/dashboard/notifications")} collapsed={collapsed} />
+        <NavItem href="/dashboard/onboarding" icon="pi-sparkles" label={t("sidebar.nav.onboarding")} shortcut="OB" active={pathname.startsWith("/dashboard/onboarding")} collapsed={collapsed} />
+        <NavItem href="/dashboard/help" icon="pi-question-circle" label={t("sidebar.nav.help")} shortcut="HE" active={pathname.startsWith("/dashboard/help")} collapsed={collapsed} />
+        <NavItem href="/dashboard/notifications" icon="pi-bell" label={t("sidebar.nav.notifications")} shortcut="NB" active={pathname.startsWith("/dashboard/notifications")} collapsed={collapsed} />
       </div>
     </aside>
   );

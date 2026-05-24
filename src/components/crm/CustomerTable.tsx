@@ -3,6 +3,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { PIPELINE_STAGES, CUSTOMER_TYPES, type CrmCustomer } from "@/lib/crm-types";
 
 interface Props {
@@ -11,16 +12,20 @@ interface Props {
   initialPages:     number;
 }
 
-const SORT_FIELDS = [
-  { id: "createdAt", label: "Oluşturulma" },
-  { id: "updatedAt", label: "Güncelleme" },
-  { id: "name",      label: "İsim" },
-];
+// SORT_FIELDS is now generated dynamically with useTranslations below
 
 interface ContextMenu { x: number; y: number; customer: CrmCustomer }
 
 export function CustomerTable({ initialCustomers, initialTotal, initialPages }: Props) {
   const router = useRouter();
+  const t = useTranslations("common");
+  
+  const SORT_FIELDS = [
+    { id: "createdAt", label: t("labels.created") },
+    { id: "updatedAt", label: t("audit.actions.update") },
+    { id: "name",      label: t("labels.name") },
+  ];
+  
   const [customers, setCustomers]   = useState(initialCustomers);
   const [total, setTotal]           = useState(initialTotal);
   const [pages, setPages]           = useState(initialPages);
@@ -104,7 +109,7 @@ export function CustomerTable({ initialCustomers, initialTotal, initialPages }: 
   }
 
   async function bulkDelete() {
-    if (!confirm(`${selected.size} müşteri silinecek. Emin misiniz?`)) return;
+    if (!confirm(`${selected.size} ${t("labels.customers")} ${t("app.delete")}. ${t("app.confirm")}?`)) return;
     setBulkLoading(true);
     await Promise.all([...selected].map((id) => fetch(`/api/modules/crm/customers/${id}`, { method: "DELETE" })));
     setSelected(new Set());
@@ -113,7 +118,7 @@ export function CustomerTable({ initialCustomers, initialTotal, initialPages }: 
   }
 
   async function deleteOne(id: string) {
-    if (!confirm("Bu müşteriyi silmek istiyor musunuz?")) return;
+    if (!confirm(t("confirmations.deleteCustomer"))) return;
     await fetch(`/api/modules/crm/customers/${id}`, { method: "DELETE" });
     setContextMenu(null);
     await load();
@@ -129,7 +134,7 @@ export function CustomerTable({ initialCustomers, initialTotal, initialPages }: 
   }
 
   function exportCsv() {
-    const headers = ["Ad", "Tür", "E-posta", "Telefon", "Şehir", "Aşama", "Oluşturulma"];
+    const headers = [t("labels.name"), t("crm.customerType.corporate"), t("labels.email"), t("labels.phone"), t("labels.city"), t("crm.pipelineStage.customer"), t("labels.createdAt")];
     const rows = customers.map((c) => [
       c.name, c.type, c.email ?? "", c.phone ?? "", c.city ?? "",
       c.pipelineStage, new Date(c.createdAt).toLocaleDateString("tr-TR"),
@@ -154,7 +159,7 @@ export function CustomerTable({ initialCustomers, initialTotal, initialPages }: 
             ref={searchRef}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Müşteri ara… (/ ile odaklan)"
+            placeholder={`${t("crm.customers")} ${t("app.search")} (/ ${t("app.search")})`}
             className="w-full pl-9 pr-3 py-2 rounded-lg border border-border bg-white dark:bg-slate-900 text-foreground text-sm focus:outline-none focus:ring-2"
             style={{ "--tw-ring-color": "var(--color-primary)" } as React.CSSProperties}
           />
@@ -163,14 +168,14 @@ export function CustomerTable({ initialCustomers, initialTotal, initialPages }: 
         {/* Stage filter */}
         <select value={stageFilter} onChange={(e) => { setStageFilter(e.target.value); setPage(1); void load({ pg: 1, stage: e.target.value }); }}
           className="px-3 py-2 rounded-lg border border-border bg-white dark:bg-slate-900 text-foreground text-sm focus:outline-none cursor-pointer">
-          <option value="">Tüm Aşamalar</option>
+          <option value="">{t("app.all")} {t("crm.pipeline")}</option>
           {PIPELINE_STAGES.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
         </select>
 
         {/* Type filter */}
         <select value={typeFilter} onChange={(e) => { setTypeFilter(e.target.value); setPage(1); void load({ pg: 1, type: e.target.value }); }}
           className="px-3 py-2 rounded-lg border border-border bg-white dark:bg-slate-900 text-foreground text-sm focus:outline-none cursor-pointer">
-          <option value="">Tüm Türler</option>
+          <option value="">{t("app.all")} {t("labels.type")}</option>
           {CUSTOMER_TYPES.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
         </select>
 
@@ -185,7 +190,7 @@ export function CustomerTable({ initialCustomers, initialTotal, initialPages }: 
           ])}
         </select>
 
-        <button onClick={exportCsv} className="px-3 py-2 rounded-lg border border-border text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 text-sm transition" title="CSV İndir">
+        <button onClick={exportCsv} className="px-3 py-2 rounded-lg border border-border text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 text-sm transition" title={t("app.downloadCsv")}>
           <i className="pi pi-download" />
         </button>
       </div>
@@ -194,13 +199,13 @@ export function CustomerTable({ initialCustomers, initialTotal, initialPages }: 
       {selected.size > 0 && (
         <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl border border-primary/30 bg-blue-50/50 dark:bg-blue-950/20 text-sm"
           style={{ borderColor: "var(--color-primary)33" }}>
-          <span className="font-medium text-foreground">{selected.size} seçili</span>
+          <span className="font-medium text-foreground">{selected.size} {t("app.active")}</span>
           <button onClick={bulkDelete} disabled={bulkLoading}
             className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition text-xs font-medium">
-            <i className="pi pi-trash text-xs" /> Sil
+            <i className="pi pi-trash text-xs" /> {t("app.delete")}
           </button>
           <button onClick={() => setSelected(new Set())} className="text-xs text-slate-500 hover:text-foreground ml-auto">
-            Seçimi temizle
+            {t("app.reset")}
           </button>
         </div>
       )}
@@ -219,12 +224,12 @@ export function CustomerTable({ initialCustomers, initialTotal, initialPages }: 
                 <th className="w-10 py-3 px-4">
                   <input type="checkbox" checked={allSelected} onChange={toggleAll} className="rounded" />
                 </th>
-                <th className="py-3 px-4 text-left font-medium text-slate-500">Müşteri</th>
-                <th className="py-3 px-4 text-left font-medium text-slate-500 hidden sm:table-cell">İletişim</th>
-                <th className="py-3 px-4 text-left font-medium text-slate-500 hidden md:table-cell">Şehir</th>
-                <th className="py-3 px-4 text-left font-medium text-slate-500">Aşama</th>
-                <th className="py-3 px-4 text-left font-medium text-slate-500 hidden lg:table-cell">İletişimler</th>
-                <th className="py-3 px-4 text-left font-medium text-slate-500 hidden xl:table-cell">Tarih</th>
+                <th className="py-3 px-4 text-left font-medium text-slate-500">{t("labels.customer")}</th>
+                <th className="py-3 px-4 text-left font-medium text-slate-500 hidden sm:table-cell">{t("labels.phone")}</th>
+                <th className="py-3 px-4 text-left font-medium text-slate-500 hidden md:table-cell">{t("labels.city")}</th>
+                <th className="py-3 px-4 text-left font-medium text-slate-500">{t("crm.pipeline")}</th>
+                <th className="py-3 px-4 text-left font-medium text-slate-500 hidden lg:table-cell">{t("crm.interactions")}</th>
+                <th className="py-3 px-4 text-left font-medium text-slate-500 hidden xl:table-cell">{t("labels.date")}</th>
                 <th className="py-3 px-2 w-8" />
               </tr>
             </thead>
@@ -233,7 +238,7 @@ export function CustomerTable({ initialCustomers, initialTotal, initialPages }: 
                 <tr>
                   <td colSpan={8} className="py-16 text-center text-slate-400">
                     <i className="pi pi-users text-4xl block mb-2 opacity-30" />
-                    {search || stageFilter || typeFilter ? "Filtrele uyan müşteri bulunamadı" : "Henüz müşteri eklenmedi"}
+                    {search || stageFilter || typeFilter ? t("table.noResults") : t("table.noData")}
                   </td>
                 </tr>
               ) : customers.map((c) => {
@@ -263,7 +268,7 @@ export function CustomerTable({ initialCustomers, initialTotal, initialPages }: 
                             onClick={(e) => e.stopPropagation()}>
                             {c.name}
                           </Link>
-                          <p className="text-xs text-slate-400">{c.type === "corporate" ? "Kurumsal" : "Bireysel"}</p>
+                          <p className="text-xs text-slate-400">{c.type === "corporate" ? t("crm.customerType.corporate") : t("crm.customerType.individual")}</p>
                         </div>
                       </div>
                     </td>
@@ -300,7 +305,7 @@ export function CustomerTable({ initialCustomers, initialTotal, initialPages }: 
 
         {/* Pagination */}
         <div className="flex items-center justify-between px-4 py-3 border-t border-border text-sm text-slate-500">
-          <span>{total} kayıt</span>
+          <span>{total} {t("app.rows")}</span>
           <div className="flex items-center gap-1">
             <button onClick={() => { setPage(page - 1); void load({ pg: page - 1 }); }}
               disabled={page <= 1} className="px-2 py-1 rounded hover:bg-slate-100 disabled:opacity-30 transition">
@@ -325,18 +330,18 @@ export function CustomerTable({ initialCustomers, initialTotal, initialPages }: 
         >
           <div className="px-3 py-2 border-b border-border">
             <p className="font-semibold text-foreground truncate">{contextMenu.customer.name}</p>
-            <p className="text-xs text-slate-400">{contextMenu.customer.type === "corporate" ? "Kurumsal" : "Bireysel"}</p>
+            <p className="text-xs text-slate-400">{contextMenu.customer.type === "corporate" ? t("crm.customerType.corporate") : t("crm.customerType.individual")}</p>
           </div>
           <button onClick={() => { router.push(`/dashboard/crm/customers/${contextMenu.customer.id}`); setContextMenu(null); }}
             className="w-full text-left px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2 text-foreground transition">
-            <i className="pi pi-eye text-slate-400" /> Detay Görüntüle
+            <i className="pi pi-eye text-slate-400" /> {t("app.view")}
           </button>
           <button onClick={() => { router.push(`/dashboard/crm/customers/${contextMenu.customer.id}?tab=interactions`); setContextMenu(null); }}
             className="w-full text-left px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2 text-foreground transition">
-            <i className="pi pi-list text-slate-400" /> Etkileşimler
+            <i className="pi pi-list text-slate-400" /> {t("crm.interactions")}
           </button>
           <div className="border-t border-border mt-1 pt-1">
-            <p className="px-3 py-1 text-xs text-slate-400 font-medium">Aşama Değiştir</p>
+            <p className="px-3 py-1 text-xs text-slate-400 font-medium">{t("crm.pipeline")}</p>
             {PIPELINE_STAGES.map((s) => (
               <button key={s.id} onClick={() => moveStage(contextMenu.customer.id, s.id)}
                 className={`w-full text-left px-3 py-1.5 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2 transition text-xs ${
@@ -351,7 +356,7 @@ export function CustomerTable({ initialCustomers, initialTotal, initialPages }: 
           <div className="border-t border-border mt-1 pt-1">
             <button onClick={() => deleteOne(contextMenu.customer.id)}
               className="w-full text-left px-3 py-2 hover:bg-red-50 dark:hover:bg-red-950/20 flex items-center gap-2 text-red-600 transition">
-              <i className="pi pi-trash text-xs" /> Sil
+              <i className="pi pi-trash text-xs" /> {t("app.delete")}
             </button>
           </div>
         </div>
