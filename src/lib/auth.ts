@@ -54,14 +54,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             },
           });
 
-          if (!user || !user.password) return null;
+          if (!user || !user.password) {
+            console.error("[AUTH] User not found or no password");
+            return null;
+          }
 
           const isValid = await compare(
             credentials.password as string,
             user.password
           );
 
-          if (!isValid) return null;
+          if (!isValid) {
+            console.error("[AUTH] Invalid password");
+            return null;
+          }
 
           const permissions = user.isSuperAdmin
             ? ["*:*"]
@@ -69,6 +75,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 (rp) => `${rp.permission.module}:${rp.permission.action}`
               );
 
+          console.log("[AUTH] Login successful:", user.email);
           return {
             id: user.id,
             name: user.name,
@@ -80,7 +87,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             roleId: user.roleId,
             permissions,
           };
-        } catch {
+        } catch (error) {
+          console.error("[AUTH] Authorization error:", error);
           return null;
         }
       },

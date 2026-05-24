@@ -30,18 +30,24 @@ export default function LoginPage() {
     setLoading(true);
     setFormError(null);
 
-    const result = await signIn("credentials", {
-      email: email.trim(),
-      password,
-      redirect: false,
-    });
+    try {
+      const result = await signIn("credentials", {
+        email: email.trim(),
+        password,
+        redirect: false,
+      });
 
-    if (result?.ok) {
-      router.push(callbackUrl);
-      router.refresh();
-    } else {
+      if (result?.ok) {
+        router.push(callbackUrl);
+        router.refresh();
+      } else {
+        setFormError("E-posta veya şifre hatalı.");
+      }
+    } catch (err) {
+      console.error("[LOGIN] Error:", err);
+      setFormError("Giriş sırasında bir hata oluştu. Lütfen tekrar deneyin.");
+    } finally {
       setLoading(false);
-      setFormError("E-posta veya şifre hatalı.");
     }
   }
 
