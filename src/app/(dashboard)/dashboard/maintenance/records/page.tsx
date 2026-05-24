@@ -9,6 +9,7 @@ export default function MaintenanceRecordsPage() {
   const [records,    setRecords]    = useState<MaintenanceRecord[]>([]);
   const [schedules,  setSchedules]  = useState<MaintenanceSchedule[]>([]);
   const [equipment,  setEquipment]  = useState<EquipmentItem[]>([]);
+  const [employees,  setEmployees]  = useState<{ id: string; name: string }[]>([]);
   const [total,      setTotal]      = useState(0);
   const [pages,      setPages]      = useState(1);
   const [page,       setPage]       = useState(1);
@@ -26,11 +27,12 @@ export default function MaintenanceRecordsPage() {
       fetch("/api/modules/maintenance/schedules?limit=200"),
       fetch("/api/modules/equipment?limit=200"),
     ]);
-    const rd = await rr.json() as { records: MaintenanceRecord[]; total: number; pages: number; totalCost: number };
+    const rd = await rr.json() as { records: MaintenanceRecord[]; total: number; pages: number; totalCost: number; employees?: { id: string; name: string }[] };
     const sd = await sr.json() as { schedules: MaintenanceSchedule[] };
     const ed = await er.json() as { equipment: EquipmentItem[] };
     setRecords(rd.records); setTotal(rd.total); setPages(rd.pages); setTotalCost(rd.totalCost);
     setSchedules(sd.schedules); setEquipment(ed.equipment);
+    if (rd.employees) setEmployees(rd.employees);
     setLoading(false);
   }, [page]);
 
@@ -148,7 +150,20 @@ export default function MaintenanceRecordsPage() {
                     {equipment.map((e) => <option key={e.id} value={e.id}>{e.name}</option>)}
                   </select></div>
                 <div><label className="block text-xs font-medium text-slate-500 mb-1">Teknisyen</label>
-                  <input value={form.technician} onChange={(e) => setForm((p) => ({ ...p, technician: e.target.value }))} className="w-full px-3 py-2 rounded-lg border border-border text-foreground text-sm focus:outline-none" /></div>
+                  <div className="relative">
+                    <select
+                      value={form.technician}
+                      onChange={(e) => setForm((p) => ({ ...p, technician: e.target.value }))}
+                      className="w-full px-3 py-2 rounded-lg border border-border bg-white dark:bg-slate-900 text-foreground text-sm cursor-pointer appearance-none focus:outline-none"
+                    >
+                      <option value="">— Teknisyen Seçin —</option>
+                      {employees.map((emp) => (
+                        <option key={emp.id} value={emp.name}>{emp.name}</option>
+                      ))}
+                    </select>
+                    <i className="pi pi-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none" />
+                  </div>
+                </div>
                 <div><label className="block text-xs font-medium text-slate-500 mb-1">Maliyet (TRY)</label>
                   <input type="number" min="0" value={form.cost} onChange={(e) => setForm((p) => ({ ...p, cost: Number(e.target.value) }))} className="w-full px-3 py-2 rounded-lg border border-border text-foreground text-sm focus:outline-none text-right" /></div>
                 <div><label className="block text-xs font-medium text-slate-500 mb-1">Süre (saat)</label>

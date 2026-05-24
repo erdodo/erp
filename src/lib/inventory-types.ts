@@ -56,6 +56,7 @@ export interface Warehouse {
   isActive:    boolean;
   createdAt:   string;
   _count?:     { stockItems: number };
+  rentals?:    { id: string; name: string; ownershipType: string }[];
 }
 
 export interface StockItem {

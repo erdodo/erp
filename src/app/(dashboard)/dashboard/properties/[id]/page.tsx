@@ -202,10 +202,14 @@ export default function PropertyDetailPage() {
                 <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 font-semibold uppercase">
                   {PROP_LABELS[property.type] ?? property.type}
                 </span>
-                <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${
-                  activeContract ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400" : "bg-rose-100 text-rose-700 dark:bg-rose-950/30 dark:text-rose-400"
+                 <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${
+                  property.ownershipType === "owned_by_us"
+                    ? "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                    : property.ownershipType === "rented_from_landlord"
+                    ? activeContract ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-950/30 dark:text-indigo-400" : "bg-amber-100 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400"
+                    : activeContract ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400" : "bg-rose-100 text-rose-700 dark:bg-rose-950/30 dark:text-rose-400"
                 }`}>
-                  {activeContract ? "KİRADA" : "BOŞ"}
+                  {property.ownershipType === "owned_by_us" ? "ÖZ MÜLK" : property.ownershipType === "rented_from_landlord" ? (activeContract ? "KİRALADIĞIMIZ" : "SÖZLEŞMESİZ") : (activeContract ? "KİRADA" : "BOŞ")}
                 </span>
               </div>
               <div className="flex flex-wrap gap-4 text-xs text-slate-400 font-medium">
@@ -227,10 +231,20 @@ export default function PropertyDetailPage() {
         {/* Dynamic Quick Stat KPIs */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6 pt-6 border-t border-border/60">
           {[
-            { label: "Aylık Kira", value: activeContract ? `₺${activeContract.amount.toLocaleString("tr-TR")}` : "₺0", icon: "pi-percentage", color: "text-blue-600 bg-blue-50 dark:bg-blue-950/20" },
+            {
+              label: property.ownershipType === "owned_by_us" ? "Mülkiyet Durumu" : property.ownershipType === "rented_from_landlord" ? "Aylık Kira Gideri" : "Aylık Kira Geliri",
+              value: property.ownershipType === "owned_by_us" ? "Kendi Kullanımımız" : activeContract ? `₺${activeContract.amount.toLocaleString("tr-TR")}` : "₺0",
+              icon: "pi-percentage",
+              color: "text-blue-600 bg-blue-50 dark:bg-blue-950/20"
+            },
             { label: "Personel Sayısı", value: stats.employeesCount, icon: "pi-users", color: "text-emerald-600 bg-emerald-50 dark:bg-emerald-950/20" },
             { label: "Kayıtlı Ekipman", value: stats.equipmentsCount, icon: "pi-wrench", color: "text-amber-600 bg-amber-50 dark:bg-amber-950/20" },
-            { label: "Kira Sözleşmesi", value: stats.contractsCount, icon: "pi-file-o", color: "text-purple-600 bg-purple-50 dark:bg-purple-950/20" },
+            {
+              label: property.ownershipType === "owned_by_us" ? "Kullanım Şekli" : "Kira Sözleşmesi",
+              value: property.ownershipType === "owned_by_us" ? "Öz Mülk" : `${stats.contractsCount} adet`,
+              icon: "pi-file-o",
+              color: "text-purple-600 bg-purple-50 dark:bg-purple-950/20"
+            },
           ].map((stat, idx) => (
             <div key={idx} className="rounded-xl border border-border/80 p-3.5 flex items-center gap-3">
               <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${stat.color}`}>
@@ -345,44 +359,63 @@ export default function PropertyDetailPage() {
             <div className="space-y-5">
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <h3 className="text-sm font-bold text-foreground uppercase tracking-wider flex items-center gap-2">
-                  <span className="w-1.5 h-3 rounded-xs" style={{ background: "var(--color-primary)" }} /> Kira Sözleşmesi Detayı
+                  <span className="w-1.5 h-3 rounded-xs" style={{ background: "var(--color-primary)" }} /> {
+                    property.ownershipType === "owned_by_us" ? "Mülkiyet & Kullanım Bilgisi"
+                    : property.ownershipType === "rented_from_landlord" ? "Kiralama Sözleşmesi Detayı"
+                    : "Kira Sözleşmesi Detayı"
+                  }
                 </h3>
-                {!activeContract && (
+                {property.ownershipType !== "owned_by_us" && !activeContract && (
                   <button
                     onClick={() => setShowContractModal(true)}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-white hover:opacity-90 transition"
                     style={{ background: "var(--color-primary)" }}
                   >
-                    <i className="pi pi-plus text-[10px]" /> Yeni Sözleşme Yap
+                    <i className="pi pi-plus text-[10px]" /> {property.ownershipType === "rented_from_landlord" ? "Yeni Sözleşme Tanımla" : "Yeni Sözleşme Yap"}
                   </button>
                 )}
               </div>
 
-              {!activeContract ? (
+              {property.ownershipType === "owned_by_us" ? (
+                <div className="text-center py-16 border border-dashed border-border bg-slate-50/40 dark:bg-slate-800/10 rounded-2xl p-6">
+                  <i className="pi pi-home text-4xl text-slate-300 dark:text-slate-700 mb-3 block" />
+                  <p className="text-slate-600 dark:text-slate-300 font-bold text-sm">Kendi Kullanımımızda (Öz Mülk)</p>
+                  <p className="text-slate-400 text-xs mt-1 max-w-sm mx-auto">Bu mülk şirketimizin öz kullanımında olduğundan aktif bir kira sözleşmesi veya kiralama ödemesi takibi bulunmamaktadır.</p>
+                </div>
+              ) : !activeContract ? (
                 <div className="text-center py-12 border border-dashed border-border bg-slate-50/40 dark:bg-slate-800/10 rounded-2xl p-6">
                   <i className="pi pi-percentage text-4xl text-slate-300 dark:text-slate-700 mb-3 block" />
-                  <p className="text-slate-500 font-semibold text-sm">Aktif Kira Sözleşmesi Yok</p>
-                  <p className="text-slate-400 text-xs mt-0.5">Bu mülkü kiralamak ve kira ödemelerini başlatmak için sözleşme oluşturun.</p>
+                  <p className="text-slate-500 font-semibold text-sm">
+                    {property.ownershipType === "rented_from_landlord" ? "Aktif Kiralama Sözleşmesi Yok" : "Aktif Kira Sözleşmesi Yok"}
+                  </p>
+                  <p className="text-slate-400 text-xs mt-0.5">
+                    {property.ownershipType === "rented_from_landlord" ? "Bu mülk için kiraladığınız mülk sahibiyle yaptığınız kira sözleşmesini tanımlayın ve ödemelerinizi takip edin." : "Bu mülkü kiralamak ve kira ödemelerini başlatmak için sözleşme oluşturun."}
+                  </p>
                   <button
                     onClick={() => setShowContractModal(true)}
                     className="mt-4 px-4 py-2 rounded-xl text-white text-xs font-bold transition shadow-sm"
                     style={{ background: "var(--color-primary)" }}
                   >
-                    Kira Sözleşmesi Tanımla
+                    {property.ownershipType === "rented_from_landlord" ? "Kiralama Sözleşmesi Tanımla" : "Kira Sözleşmesi Tanımla"}
                   </button>
                 </div>
               ) : (
                 <div className="space-y-6">
-                  <div className="rounded-2xl border border-emerald-100 bg-emerald-50/10 dark:border-emerald-950/20 dark:bg-emerald-950/5 p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                  <div className={`rounded-2xl border p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 ${
+                    property.ownershipType === "rented_from_landlord" ? "border-indigo-100 bg-indigo-50/10 dark:border-indigo-950/20 dark:bg-indigo-950/5 text-indigo-700" : "border-emerald-100 bg-emerald-50/10 dark:border-emerald-950/20 dark:bg-emerald-950/5 text-emerald-700"
+                  }`}>
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
                         <h4 className="font-bold text-foreground text-base">{activeContract.tenantName}</h4>
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-bold uppercase">
-                          SÖZLEŞME AKTİF
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${
+                          property.ownershipType === "rented_from_landlord" ? "bg-indigo-100 text-indigo-700" : "bg-emerald-100 text-emerald-700"
+                        }`}>
+                          {property.ownershipType === "rented_from_landlord" ? "BİZ BİZ KİRACIYIZ" : "KİRACIDA"}
                         </span>
                       </div>
                       <p className="text-xs text-slate-400 font-semibold">
-                        Süreç: {new Date(activeContract.startDate).toLocaleDateString("tr-TR")} 
+                        {property.ownershipType === "rented_from_landlord" ? "Kiralama Süresi: " : "Sözleşme Süresi: "}
+                        {new Date(activeContract.startDate).toLocaleDateString("tr-TR")} 
                         {activeContract.endDate ? ` — ${new Date(activeContract.endDate).toLocaleDateString("tr-TR")}` : " (Belirsiz Süreli)"}
                       </p>
                       {activeContract.notes && <p className="text-xs text-slate-500 mt-1 italic">"{activeContract.notes}"</p>}
@@ -390,14 +423,18 @@ export default function PropertyDetailPage() {
 
                     <div className="flex items-center gap-4 shrink-0">
                       <div className="text-right">
-                        <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Aylık Kira Bedeli</p>
-                        <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400">{activeContract.amount.toLocaleString("tr-TR")} {activeContract.currency}</p>
+                        <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+                          {property.ownershipType === "rented_from_landlord" ? "Aylık Ödenen Kira" : "Aylık Kira Bedeli"}
+                        </p>
+                        <p className={`text-xl font-bold ${
+                          property.ownershipType === "rented_from_landlord" ? "text-indigo-600 dark:text-indigo-400" : "text-emerald-600 dark:text-emerald-400"
+                        }`}>{activeContract.amount.toLocaleString("tr-TR")} {activeContract.currency}</p>
                       </div>
                       <button
                         onClick={() => markContractInactive(activeContract.id)}
                         className="px-3.5 py-2 rounded-xl text-xs font-semibold border border-red-200 dark:border-red-950 bg-white dark:bg-slate-900 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/10 transition"
                       >
-                        Sonlandır
+                        Sözleşmeyi Bitir
                       </button>
                     </div>
                   </div>
@@ -809,7 +846,9 @@ export default function PropertyDetailPage() {
           <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-md overflow-hidden border border-border animate-in fade-in zoom-in-95 duration-150">
             {/* Modal Header */}
             <div className="px-6 py-4 border-b border-border flex items-center justify-between">
-              <h2 className="text-lg font-bold text-foreground">Yeni Kira Sözleşmesi Yap</h2>
+              <h2 className="text-lg font-bold text-foreground">
+                {property.ownershipType === "rented_from_landlord" ? "Yeni Kiralama Sözleşmesi Yap" : "Yeni Kira Sözleşmesi Yap"}
+              </h2>
               <button
                 onClick={() => setShowContractModal(false)}
                 className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 transition"
@@ -821,19 +860,23 @@ export default function PropertyDetailPage() {
             {/* Modal Body */}
             <div className="p-6 space-y-4">
               <div>
-                <label className="text-xs font-semibold text-slate-400 block mb-1">Kiracı Adı *</label>
+                <label className="text-xs font-semibold text-slate-400 block mb-1">
+                  {property.ownershipType === "rented_from_landlord" ? "Mülk Sahibi / Kiralayan Adı *" : "Kiracı Adı *"}
+                </label>
                 <input
                   type="text"
                   value={contractForm.tenantName}
                   onChange={(e) => setContractForm((f) => ({ ...f, tenantName: e.target.value }))}
-                  placeholder="ör. Ahmet Yılmaz veya Şirket Ünvanı"
+                  placeholder={property.ownershipType === "rented_from_landlord" ? "ör. Ahmet Yılmaz (Mülk Sahibi)" : "ör. Ahmet Yılmaz veya Şirket Ünvanı"}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-semibold text-slate-400 block mb-1">Aylık Kira Bedeli *</label>
+                  <label className="text-xs font-semibold text-slate-400 block mb-1">
+                    {property.ownershipType === "rented_from_landlord" ? "Aylık Ödenen Kira *" : "Aylık Kira Bedeli *"}
+                  </label>
                   <input
                     type="number"
                     value={contractForm.amount}

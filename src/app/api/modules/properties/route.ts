@@ -33,6 +33,7 @@ export async function POST(req: NextRequest) {
   const body = await req.json() as {
     name: string;
     type: string;
+    ownershipType?: string;
     address?: string;
     area?: number;
     storeId?: string;
@@ -77,6 +78,7 @@ export async function POST(req: NextRequest) {
       tenantId,
       name: body.name,
       type: body.type || "office",
+      ownershipType: body.ownershipType || "leased_to_tenant",
       address: body.address || null,
       area: body.area ? Number(body.area) : null,
       storeId,
@@ -106,6 +108,7 @@ export async function PATCH(req: NextRequest) {
     id: string;
     name?: string;
     type?: string;
+    ownershipType?: string;
     address?: string;
     area?: number;
     storeId?: string | null;

@@ -125,7 +125,7 @@ export default function NewProductionOrderPage() {
             </div>
             <div className="sm:col-span-2">
               <label className="block text-xs font-medium text-slate-500 mb-1">Notlar</label>
-              <textarea value={form.notes} onChange={(e) => set("notes", e.target.value)} rows={3} resize-none
+              <textarea value={form.notes} onChange={(e) => set("notes", e.target.value)} rows={3}
                 className="w-full px-3 py-2 rounded-lg border border-border text-foreground text-sm focus:outline-none resize-none" />
             </div>
           </div>

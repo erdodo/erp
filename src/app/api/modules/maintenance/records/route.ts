@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 export async function GET(req: NextRequest) {
   const session = await auth();
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const tenantId = session.user.tenantId!;
 
   const { searchParams } = req.nextUrl;
   const equipmentId  = searchParams.get("equipmentId")  ?? "";
@@ -18,7 +19,7 @@ export async function GET(req: NextRequest) {
     ...(scheduleId  ? { scheduleId }  : {}),
   };
 
-  const [records, total] = await Promise.all([
+  const [records, total, employees] = await Promise.all([
     prisma.maintenanceRecord.findMany({
       where, skip: (page-1)*limit, take: limit, orderBy: { completedAt: "desc" },
       include: {
@@ -27,10 +28,14 @@ export async function GET(req: NextRequest) {
       },
     }),
     prisma.maintenanceRecord.count({ where }),
+    prisma.employee.findMany({
+      where: { tenantId, deletedAt: null, isActive: true },
+      select: { id: true, name: true },
+    }),
   ]);
 
   const totalCost = records.reduce((s, r) => s + (r.cost ?? 0), 0);
-  return NextResponse.json({ records, total, pages: Math.ceil(total / limit), totalCost });
+  return NextResponse.json({ records, total, pages: Math.ceil(total / limit), totalCost, employees });
 }
 
 export async function POST(req: NextRequest) {

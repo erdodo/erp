@@ -723,8 +723,10 @@ model Employee {
   store         RetailStore?   @relation(fields: [storeId], references: [id])
   tenant        Tenant         @relation(fields: [tenantId], references: [id])
   vehicles      Vehicle[]
+  serviceRoutes ServiceRoute[] @relation("ServiceDriver")
   leaveBalances LeaveBalance[]
   leaveRequests LeaveRequest[] @relation("EmployeeLeaves")
+  fieldServices FieldService[]
   user          User?
 }
 
@@ -956,22 +958,23 @@ model SubscriptionRenewal {
 }
 
 model RentalProperty {
-  id          String           @id @default(cuid())
-  tenantId    String
-  name        String
-  type        String           @default("office")
-  address     String?
-  area        Float?
-  storeId     String?
-  warehouseId String?
-  isActive    Boolean          @default(true)
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
-  deletedAt   DateTime?
-  contracts   RentalContract[]
-  store       RetailStore?     @relation(fields: [storeId], references: [id])
-  warehouse   Warehouse?       @relation(fields: [warehouseId], references: [id])
-  tenant      Tenant           @relation(fields: [tenantId], references: [id])
+  id            String           @id @default(cuid())
+  tenantId      String
+  name          String
+  type          String           @default("office")
+  ownershipType String           @default("leased_to_tenant")
+  address       String?
+  area          Float?
+  storeId       String?
+  warehouseId   String?
+  isActive      Boolean          @default(true)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  deletedAt     DateTime?
+  contracts     RentalContract[]
+  store         RetailStore?     @relation(fields: [storeId], references: [id])
+  warehouse     Warehouse?       @relation(fields: [warehouseId], references: [id])
+  tenant        Tenant           @relation(fields: [tenantId], references: [id])
 }
 
 model RentalContract {
@@ -1056,6 +1059,7 @@ model Vehicle {
   fuelRecords             FuelRecord[]
   expenses                Expense[]
   serviceRouteAssignments ServiceRoute[]
+  fieldServices           FieldService[]
   driver                  Employee?      @relation(fields: [driverId], references: [id])
   tenant                  Tenant         @relation(fields: [tenantId], references: [id])
 }
@@ -1075,21 +1079,25 @@ model FuelRecord {
 }
 
 model ServiceRoute {
-  id          String    @id @default(cuid())
-  tenantId    String
-  name        String
-  vehicleId   String?
-  driverId    String?
-  status      String    @default("planned")
-  stops       String?
-  notes       String?
-  startedAt   DateTime?
-  completedAt DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  deletedAt   DateTime?
-  tenant      Tenant    @relation(fields: [tenantId], references: [id])
-  vehicle     Vehicle?  @relation(fields: [vehicleId], references: [id])
+  id           String    @id @default(cuid())
+  tenantId     String
+  name         String
+  vehicleId    String?
+  driverId     String?
+  status       String    @default("planned")
+  stops        String?
+  path         String?
+  passengerIds String?
+  distance     Float?
+  notes        String?
+  startedAt    DateTime?
+  completedAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+  tenant       Tenant    @relation(fields: [tenantId], references: [id])
+  vehicle      Vehicle?  @relation(fields: [vehicleId], references: [id])
+  driver       Employee? @relation("ServiceDriver", fields: [driverId], references: [id])
 }
 
 model ExpenseCategory {
@@ -1136,6 +1144,8 @@ model FieldService {
   tenantId    String
   customerId  String?
   assignedTo  String?
+  employeeId  String?
+  vehicleId   String?
   type        String    @default("repair")
   title       String
   description String?
@@ -1152,6 +1162,8 @@ model FieldService {
   deletedAt   DateTime?
   technician  User?     @relation(fields: [assignedTo], references: [id])
   customer    Customer? @relation(fields: [customerId], references: [id])
+  employee    Employee? @relation(fields: [employeeId], references: [id])
+  vehicle     Vehicle?  @relation(fields: [vehicleId], references: [id])
   tenant      Tenant    @relation(fields: [tenantId], references: [id])
 }
 

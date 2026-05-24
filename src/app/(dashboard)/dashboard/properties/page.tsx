@@ -18,6 +18,7 @@ export default function PropertiesPage() {
   const [properties, setProperties] = useState<RentalProperty[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   // Filter States
@@ -29,11 +30,40 @@ export default function PropertiesPage() {
   const [form, setForm] = useState({
     name: "",
     type: "office",
+    ownershipType: "leased_to_tenant",
     address: "",
     area: "",
     autoCreateStore: true,
     autoCreateWarehouse: true,
   });
+
+  function openNew() {
+    setEditId(null);
+    setForm({
+      name: "",
+      type: "office",
+      ownershipType: "leased_to_tenant",
+      address: "",
+      area: "",
+      autoCreateStore: true,
+      autoCreateWarehouse: true,
+    });
+    setShowModal(true);
+  }
+
+  function openEdit(p: RentalProperty) {
+    setEditId(p.id);
+    setForm({
+      name: p.name,
+      type: p.type,
+      ownershipType: p.ownershipType,
+      address: p.address || "",
+      area: p.area ? String(p.area) : "",
+      autoCreateStore: false,
+      autoCreateWarehouse: false,
+    });
+    setShowModal(true);
+  }
 
   async function load() {
     setLoading(true);
@@ -57,18 +87,35 @@ export default function PropertiesPage() {
     if (!form.name) return;
     setSaving(true);
     try {
-      await fetch("/api/modules/properties", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...form,
-          area: form.area ? Number(form.area) : undefined,
-        }),
-      });
+      if (editId) {
+        await fetch("/api/modules/properties", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: editId,
+            name: form.name,
+            type: form.type,
+            ownershipType: form.ownershipType,
+            address: form.address,
+            area: form.area ? Number(form.area) : null,
+          }),
+        });
+      } else {
+        await fetch("/api/modules/properties", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...form,
+            area: form.area ? Number(form.area) : undefined,
+          }),
+        });
+      }
       setShowModal(false);
+      setEditId(null);
       setForm({
         name: "",
         type: "office",
+        ownershipType: "leased_to_tenant",
         address: "",
         area: "",
         autoCreateStore: true,
@@ -153,7 +200,7 @@ export default function PropertiesPage() {
           <p className="text-slate-500 text-sm mt-0.5">Tüm mülklerinizi, sözleşmelerinizi, finansallarınızı ve bağlı modülleri tek bir yerde yönetin</p>
         </div>
         <button
-          onClick={() => setShowModal(true)}
+          onClick={openNew}
           className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-white text-sm font-semibold hover:opacity-90 active:scale-95 transition shadow-sm"
           style={{ background: "var(--color-primary)" }}
         >
@@ -235,7 +282,7 @@ export default function PropertiesPage() {
           <p className="text-slate-500 font-semibold text-lg">Eşleşen mülk bulunamadı</p>
           <p className="text-slate-400 text-sm mt-1">Arama kriterlerinizi değiştirmeyi veya yeni bir mülk eklemeyi deneyin.</p>
           <button
-            onClick={() => setShowModal(true)}
+            onClick={openNew}
             className="mt-5 px-5 py-2.5 rounded-xl text-white text-sm font-semibold transition"
             style={{ background: "var(--color-primary)" }}
           >
@@ -264,11 +311,23 @@ export default function PropertiesPage() {
                       <i className={`pi ${typeConfig.icon} text-base`} />
                     </div>
                     <div className="flex flex-col items-end gap-1.5">
-                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${
-                        hasContracts ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400" : "bg-rose-100 text-rose-700 dark:bg-rose-950/30 dark:text-rose-400"
-                      }`}>
-                        {hasContracts ? "KİRADA" : "BOŞ"}
-                      </span>
+                      {p.ownershipType === "owned_by_us" ? (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                          ÖZ MÜLK
+                        </span>
+                      ) : p.ownershipType === "rented_from_landlord" ? (
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${
+                          hasContracts ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-950/30 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-900/30" : "bg-amber-100 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400 border border-amber-200 dark:border-amber-900/30"
+                        }`}>
+                          {hasContracts ? "KİRALADIĞIMIZ" : "SÖZLEŞMESİZ"}
+                        </span>
+                      ) : (
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${
+                          hasContracts ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/30" : "bg-rose-100 text-rose-700 dark:bg-rose-950/30 dark:text-rose-400 border border-rose-200 dark:border-rose-900/30"
+                        }`}>
+                          {hasContracts ? "KİRADA" : "BOŞ"}
+                        </span>
+                      )}
                       <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${
                         p.isActive ? "bg-blue-100 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400" : "bg-slate-100 text-slate-500 dark:bg-slate-800/40 dark:text-slate-400"
                       }`}>
@@ -301,23 +360,48 @@ export default function PropertiesPage() {
 
                   {/* Leasing Summary */}
                   <div className="bg-slate-50 dark:bg-slate-800/40 rounded-xl p-3 text-xs space-y-1.5">
-                    {hasContracts && activeContract ? (
-                      <>
-                        <div className="flex justify-between">
-                          <span className="text-slate-400 font-medium">Kiracı:</span>
-                          <span className="text-foreground font-semibold">{activeContract.tenantName}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-slate-400 font-medium">Aylık Kira:</span>
-                          <span className="text-foreground font-bold" style={{ color: "var(--color-primary)" }}>
-                            {activeContract.amount.toLocaleString("tr-TR")} {activeContract.currency}
-                          </span>
-                        </div>
-                      </>
-                    ) : (
-                      <div className="text-center py-1 text-slate-400 italic">
-                        Kira sözleşmesi bulunmuyor
+                    {p.ownershipType === "owned_by_us" ? (
+                      <div className="text-center py-1 text-slate-500 dark:text-slate-400 font-semibold flex items-center justify-center gap-1.5">
+                        <i className="pi pi-home text-xs" /> Kendi Kullanımımızda (Öz Mülk)
                       </div>
+                    ) : p.ownershipType === "rented_from_landlord" ? (
+                      hasContracts && activeContract ? (
+                        <>
+                          <div className="flex justify-between">
+                            <span className="text-slate-400 font-medium">Mülk Sahibi:</span>
+                            <span className="text-foreground font-semibold line-clamp-1 max-w-[120px] text-right">{activeContract.tenantName}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-slate-400 font-medium">Aylık Kira:</span>
+                            <span className="text-indigo-600 dark:text-indigo-400 font-bold">
+                              {activeContract.amount.toLocaleString("tr-TR")} {activeContract.currency}
+                            </span>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="text-center py-1 text-slate-400 italic">
+                          Kiralama sözleşmesi bulunmuyor
+                        </div>
+                      )
+                    ) : (
+                      hasContracts && activeContract ? (
+                        <>
+                          <div className="flex justify-between">
+                            <span className="text-slate-400 font-medium">Kiracı:</span>
+                            <span className="text-foreground font-semibold line-clamp-1 max-w-[120px] text-right">{activeContract.tenantName}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-slate-400 font-medium">Aylık Kira:</span>
+                            <span className="text-foreground font-bold" style={{ color: "var(--color-primary)" }}>
+                              {activeContract.amount.toLocaleString("tr-TR")} {activeContract.currency}
+                            </span>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="text-center py-1 text-slate-400 italic">
+                          Kira sözleşmesi bulunmuyor
+                        </div>
+                      )
                     )}
                   </div>
                 </div>
@@ -341,6 +425,13 @@ export default function PropertiesPage() {
                       <i className={`pi ${p.isActive ? "pi-eye-slash text-xs" : "pi-eye text-xs"}`} />
                     </button>
                     <button
+                      onClick={() => openEdit(p)}
+                      title="Düzenle"
+                      className="w-8 h-8 rounded-xl border border-border bg-white dark:bg-slate-950 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-900 transition text-slate-500"
+                    >
+                      <i className="pi pi-pencil text-xs" />
+                    </button>
+                    <button
                       onClick={() => remove(p.id)}
                       title="Sil"
                       className="w-8 h-8 rounded-xl border border-red-200 dark:border-red-950 bg-white dark:bg-slate-950 flex items-center justify-center hover:bg-red-50 dark:hover:bg-red-950/20 transition text-red-500"
@@ -361,7 +452,9 @@ export default function PropertiesPage() {
           <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden border border-border animate-in fade-in zoom-in-95 duration-150">
             {/* Modal Header */}
             <div className="px-6 py-4 border-b border-border flex items-center justify-between">
-              <h2 className="text-lg font-bold text-foreground">Yeni Mülk Tanımla</h2>
+              <h2 className="text-lg font-bold text-foreground">
+                {editId ? "Mülk Bilgilerini Düzenle" : "Yeni Mülk Tanımla"}
+              </h2>
               <button
                 onClick={() => setShowModal(false)}
                 className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 transition"
@@ -381,6 +474,22 @@ export default function PropertiesPage() {
                   placeholder="ör. Kadıköy Perakende Mağazası veya Maslak Depo"
                   className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                 />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-slate-400 block mb-1">Mülkiyet / Kullanım Durumu *</label>
+                <div className="relative">
+                  <select
+                    value={form.ownershipType}
+                    onChange={(e) => setForm((f) => ({ ...f, ownershipType: e.target.value }))}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-background text-foreground text-sm focus:outline-none cursor-pointer appearance-none"
+                  >
+                    <option value="leased_to_tenant">Kiraya Verdiğimiz Mülk (Biz Kiralayanız)</option>
+                    <option value="rented_from_landlord">Kiraladığımız Mülk (Biz Kiracıyız)</option>
+                    <option value="owned_by_us">Kendi Kullanımımızda (Öz Mülk)</option>
+                  </select>
+                  <i className="pi pi-chevron-down absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none" />
+                </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -424,7 +533,7 @@ export default function PropertiesPage() {
               </div>
 
               {/* Conditional Provisioning Checkboxes */}
-              {form.type === "retail" && (
+              {!editId && form.type === "retail" && (
                 <div className="rounded-2xl border border-orange-100 bg-orange-50/50 dark:border-orange-950/20 dark:bg-orange-950/10 p-4 flex items-start gap-3">
                   <input
                     type="checkbox"
@@ -444,7 +553,7 @@ export default function PropertiesPage() {
                 </div>
               )}
 
-              {form.type === "warehouse" && (
+              {!editId && form.type === "warehouse" && (
                 <div className="rounded-2xl border border-teal-100 bg-teal-50/50 dark:border-teal-950/20 dark:bg-teal-950/10 p-4 flex items-start gap-3">
                   <input
                     type="checkbox"
@@ -484,7 +593,7 @@ export default function PropertiesPage() {
                     <i className="pi pi-spin pi-spinner" /> Kaydediliyor
                   </span>
                 ) : (
-                  "Mülkü Oluştur"
+                  editId ? "Değişiklikleri Kaydet" : "Mülkü Oluştur"
                 )}
               </button>
             </div>

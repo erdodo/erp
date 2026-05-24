@@ -55,8 +55,8 @@ export default function QuickAddSelect({
     setOpen(true);
   }
 
-  async function handleSubmit(e: FormEvent) {
-    e.preventDefault();
+  async function handleSubmit(e?: FormEvent) {
+    if (e) e.preventDefault();
     setSaving(true);
     setError("");
     const r = await fetch(apiEndpoint, {
@@ -120,7 +120,16 @@ export default function QuickAddSelect({
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-5 space-y-3">
+            <div
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  if ((e.target as HTMLElement).tagName === "TEXTAREA") return;
+                  e.preventDefault();
+                  void handleSubmit();
+                }
+              }}
+              className="p-5 space-y-3"
+            >
               {fields.map((f) => (
                 <div key={f.key}>
                   <label className="block text-xs font-medium text-slate-500 mb-1">
@@ -163,15 +172,16 @@ export default function QuickAddSelect({
                   İptal
                 </button>
                 <button
-                  type="submit"
+                  type="button"
+                  onClick={() => void handleSubmit()}
                   disabled={saving}
-                  className="flex-1 px-3 py-2 rounded-lg text-white text-sm font-medium disabled:opacity-60 transition"
+                  className="flex-1 px-3 py-2 rounded-lg text-white text-sm font-semibold disabled:opacity-60 transition"
                   style={{ background: "var(--color-primary)" }}
                 >
                   {saving ? <i className="pi pi-spin pi-spinner" /> : "Kaydet"}
                 </button>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       )}

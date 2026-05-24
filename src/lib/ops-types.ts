@@ -3,7 +3,7 @@
 // ============================================================
 
 export type VehicleStatus   = "active" | "maintenance" | "out_of_service";
-export type FieldServiceType = "repair" | "installation" | "maintenance" | "inspection";
+export type FieldServiceType = "repair" | "installation" | "maintenance" | "inspection" | "sales";
 export type ExpenseStatus   = "pending" | "approved" | "rejected";
 export type FuelType        = "gasoline" | "diesel" | "lpg" | "electric" | "hybrid";
 
@@ -22,6 +22,7 @@ export const FIELD_TYPES: FieldTypeConfig[] = [
   { id: "installation", label: "Kurulum",   icon: "pi-hammer",      color: "#3b82f6" },
   { id: "maintenance",  label: "Bakım",     icon: "pi-cog",         color: "#f59e0b" },
   { id: "inspection",   label: "Denetim",   icon: "pi-search",      color: "#10b981" },
+  { id: "sales",        label: "Satış",     icon: "pi-shopping-bag", color: "#ec4899" },
 ];
 
 export const EXPENSE_STATUSES: ExpenseStatusConfig[] = [
@@ -51,9 +52,10 @@ export interface FuelRecord {
 
 export interface ServiceRoute {
   id: string; tenantId: string; name: string; vehicleId: string | null; driverId: string | null;
-  status: string; stops: string | null; notes: string | null; startedAt: string | null;
+  status: string; stops: string | null; path: string | null; passengerIds: string | null; distance: number | null; notes: string | null; startedAt: string | null;
   completedAt: string | null; createdAt: string;
-  vehicle?: { id: string; plate: string } | null;
+  vehicle?: { id: string; plate: string; brand: string | null; model: string | null } | null;
+  driver?:  { id: string; name: string } | null;
 }
 
 export interface Expense {
@@ -72,14 +74,17 @@ export interface ExpenseCategory {
 
 export interface FieldService {
   id: string; tenantId: string; customerId: string | null; assignedTo: string | null;
+  employeeId: string | null; vehicleId: string | null;
   type: FieldServiceType; title: string; description: string | null; status: string;
   priority: string; scheduledAt: string | null; startedAt: string | null;
   completedAt: string | null; notes: string | null; createdAt: string;
   customer?: { id: string; name: string } | null;
+  employee?: { id: string; name: string } | null;
+  vehicle?:  { id: string; plate: string; brand: string | null; model: string | null } | null;
 }
 
 export interface RentalProperty {
-  id: string; tenantId: string; name: string; type: string; address: string | null;
+  id: string; tenantId: string; name: string; type: string; ownershipType: string; address: string | null;
   area: number | null; isActive: boolean; createdAt: string;
   storeId?: string | null;
   warehouseId?: string | null;
