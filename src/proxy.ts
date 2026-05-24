@@ -29,21 +29,27 @@ export async function proxy(request: NextRequest) {
   const isSuperAdmin = token?.isSuperAdmin === true;
   const isActive = token?.isActive !== false;
 
+  console.log("[PROXY]", { pathname, isAuthenticated, isSuperAdmin, isActive, token: !!token });
+
   if (isDashboardPage && !isAuthenticated) {
+    console.log("[PROXY] Redirecting to login - not authenticated");
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
   if (isDashboardPage && isAuthenticated && !isActive) {
+    console.log("[PROXY] Redirecting to login - inactive user");
     return NextResponse.redirect(new URL("/login?error=inactive", request.url));
   }
 
   if (isSuperAdminPage && !isSuperAdmin) {
+    console.log("[PROXY] Redirecting to dashboard - not superadmin");
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
   if (isAuthPage && isAuthenticated) {
+    console.log("[PROXY] Redirecting to callbackUrl - already authenticated");
     const callbackUrl = searchParams.get("callbackUrl") ?? "/dashboard";
     return NextResponse.redirect(new URL(callbackUrl, request.url));
   }
