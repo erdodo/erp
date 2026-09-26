@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { logAction, type AuditAction } from "@/lib/audit";
+import { isCampaignActive } from "@/lib/campaign";
 
 export interface GuardedSession {
   userId: string;
@@ -43,6 +44,11 @@ export async function requireModule(
   if (!authResult.ok) return authResult;
 
   if (authResult.session.isSuperAdmin) {
+    return { ok: true, session: authResult.session };
+  }
+
+  // Lansman kampanyası süresince tüm modüller açık
+  if (isCampaignActive()) {
     return { ok: true, session: authResult.session };
   }
 

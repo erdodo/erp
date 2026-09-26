@@ -10,6 +10,7 @@ import { useHotkey } from "@/hooks/useHotkey";
 import { useSession } from "next-auth/react";
 import { useBranding } from "@/hooks/useBranding";
 import { GlobalSearch } from "@/components/ui/GlobalSearch";
+import { CampaignBanner } from "@/components/layout/CampaignBanner";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 
@@ -79,6 +80,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        <CampaignBanner />
         <Header />
         <TabBar />
         <main className="flex-1 overflow-auto p-4 md:p-6">

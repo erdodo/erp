@@ -26,7 +26,7 @@ export default function NewOrderPage() {
   const [customerId,  setCustomerId]  = useState("");
   const [storeId, setStoreId] = useState("");
   const [salespersonId, setSalespersonId] = useState("");
-  const [salespeople, setSalespeople] = useState<[{id:string; name:string}]>([]);
+  const [salespeople, setSalespeople] = useState<{ id: string; name: string }[]>([]);
   const [channel, setChannel] = useState("virtual"); // "virtual" or "store"
   const [maintenanceDate, setMaintenanceDate] = useState("");
   const [maintenanceFee, setMaintenanceFee] = useState(0);

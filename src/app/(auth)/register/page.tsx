@@ -4,6 +4,7 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { CAMPAIGN_END_LABEL } from "@/lib/campaign";
 import { useTranslations } from "next-intl";
 
 export default function RegisterPage() {
@@ -88,6 +89,9 @@ export default function RegisterPage() {
           <span className="text-xl font-bold">ERP Sistemi</span>
         </div>
         <h2 className="text-3xl font-bold text-foreground">{t("registerTitle")}</h2>
+        <p className="mt-3 inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+          🎉 Lansman kampanyası: {CAMPAIGN_END_LABEL} tarihine kadar tüm modüller ücretsiz
+        </p>
         <p className="text-slate-500 mt-1">{t("registerSubtitle")}</p>
       </div>
 

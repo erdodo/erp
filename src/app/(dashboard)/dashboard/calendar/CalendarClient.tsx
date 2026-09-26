@@ -44,7 +44,8 @@ export function CalendarClient() {
         fetch("/api/modules/hr/leave?limit=200"),
       ]);
 
-      const [salesData, subsData, rentData, prodData, projData, leaveData] = await Promise.all([
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const [salesData, subsData, rentData, prodData, projData, leaveData]: Record<string, any>[] = await Promise.all([
         salesRes.ok  ? salesRes.json()  : {},
         subsRes.ok   ? subsRes.json()   : {},
         rentRes.ok   ? rentRes.json()   : {},

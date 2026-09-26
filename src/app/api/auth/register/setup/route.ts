@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { REGISTER_ACTIONS, REGISTER_DEFAULT_QUOTAS, REGISTER_MODULES } from "@/lib/register-setup";
+import { isCampaignActive } from "@/lib/campaign";
 
 const setupSchema = z.object({
   tenantId: z.string().cuid(),
@@ -69,7 +70,7 @@ export async function POST(req: NextRequest) {
               create: {
                 tenantId,
                 module,
-                isActive: false,
+                isActive: isCampaignActive(),
                 sortOrder: index,
               },
             })
@@ -85,7 +86,7 @@ export async function POST(req: NextRequest) {
             resource: quota.resource,
             maxCount: quota.maxCount,
             currentCount: 0,
-            isUnlimited: false,
+            isUnlimited: isCampaignActive(),
           })),
           skipDuplicates: true,
         });

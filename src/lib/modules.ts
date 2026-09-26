@@ -1,10 +1,13 @@
 import { prisma } from "./prisma";
 import { ALL_MODULES } from "./modules-data";
+import { isCampaignActive } from "./campaign";
 
 export type { ModuleDef } from "./modules-data";
 export { ALL_MODULES, MODULE_GROUPS, getModuleDef } from "./modules-data";
 
 export async function getActiveModules(tenantId: string) {
+  // Lansman kampanyası: tüm modüller herkese açık
+  if (isCampaignActive()) return ALL_MODULES;
   const active = await prisma.tenantModule.findMany({
     where: { tenantId, isActive: true },
     select: { module: true, sortOrder: true },
@@ -16,6 +19,7 @@ export async function getActiveModules(tenantId: string) {
 }
 
 export async function isModuleActive(tenantId: string, slug: string): Promise<boolean> {
+  if (isCampaignActive()) return true;
   const rec = await prisma.tenantModule.findUnique({
     where: { tenantId_module: { tenantId, module: slug } },
   });

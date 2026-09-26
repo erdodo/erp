@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
+import { CAMPAIGN_END_LABEL, CONTACT_EMAIL, isTenantReadOnly } from "@/lib/campaign";
 
 export async function proxy(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
@@ -32,6 +33,24 @@ export async function proxy(request: NextRequest) {
   const isActive = token?.isActive !== false;
 
   console.log("[PROXY]", { pathname, isAuthenticated, isSuperAdmin, isActive, token: !!token });
+
+  // Kampanya süresi dolduysa ve aboneliği yoksa: salt okunur (veri değiştiren API istekleri engellenir)
+  const isMutation = !["GET", "HEAD", "OPTIONS"].includes(request.method);
+  if (
+    isMutation &&
+    pathname.startsWith("/api/") &&
+    isAuthenticated &&
+    !isSuperAdmin &&
+    isTenantReadOnly(token?.tenantId as string | undefined)
+  ) {
+    return NextResponse.json(
+      {
+        error: `Ücretsiz kampanya süresi ${CAMPAIGN_END_LABEL} tarihinde sona erdi. Hesabınız salt okunur; aboneliğe geçmek için ${CONTACT_EMAIL} adresinden iletişime geçin.`,
+        readOnly: true,
+      },
+      { status: 402 },
+    );
+  }
 
   if (isDashboardPage && !isAuthenticated) {
     console.log("[PROXY] Redirecting to login - not authenticated");

@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { getActiveModules } from "@/lib/modules";
 import { DashboardGrid } from "@/components/dashboard/DashboardGrid";
 
 export default async function DashboardPage() {
@@ -17,7 +18,7 @@ export default async function DashboardPage() {
 
   if (user.tenantId) {
     const [modules, tenant, okrPeriod] = await Promise.all([
-      prisma.tenantModule.count({ where: { tenantId: user.tenantId, isActive: true } }),
+      getActiveModules(user.tenantId).then((m) => m.length),
       prisma.tenant.findUnique({ where: { id: user.tenantId }, select: { name: true } }),
       prisma.okrPeriod.findFirst({ where: { tenantId: user.tenantId, isActive: true, deletedAt: null }, select: { id: true, name: true } })
     ]);

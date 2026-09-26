@@ -1,4 +1,5 @@
 import { prisma } from "./prisma";
+import { isCampaignActive } from "./campaign";
 
 export interface QuotaStatus {
   allowed: boolean;
@@ -9,6 +10,10 @@ export interface QuotaStatus {
 }
 
 export async function checkQuota(tenantId: string, resource: string): Promise<QuotaStatus> {
+  // Lansman kampanyası: kota sınırı yok
+  if (isCampaignActive()) {
+    return { allowed: true, current: 0, max: -1, remaining: -1, isUnlimited: true };
+  }
   const quota = await prisma.tenantQuota.findUnique({
     where: { tenantId_resource: { tenantId, resource } },
   });
