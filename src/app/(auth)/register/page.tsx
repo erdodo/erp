@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Honeypot } from "@/components/Honeypot";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -14,6 +15,8 @@ export default function RegisterPage() {
     name: "", email: "", password: "", confirmPassword: "", companyName: "",
   });
   const [loading, setLoading] = useState(false);
+  const [hp, setHp] = useState("");
+  const [startedAt] = useState(() => Date.now());
   const [error, setError] = useState<string | null>(null);
   const [showPass, setShowPass] = useState(false);
 
@@ -46,6 +49,8 @@ export default function RegisterPage() {
           email: form.email,
           password: form.password,
           companyName: form.companyName,
+          website: hp,
+          startedAt,
         }),
       });
 
@@ -102,7 +107,8 @@ export default function RegisterPage() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4 relative">
+        <Honeypot value={hp} onChange={setHp} />
         {fields.map((f) => (
           <div key={f.key}>
             <label className="block text-sm font-medium text-foreground mb-1.5">{f.label}</label>

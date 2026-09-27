@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { hash } from "bcryptjs";
 import { z } from "zod";
+import { BURST_MESSAGE, burstSince, isSignupBurst, spamCheck } from "@/lib/antispam";
 
 const registerSchema = z.object({
   name: z.string().min(2).max(100),
@@ -23,6 +24,11 @@ const ACTIONS = ["view", "create", "update", "delete", "export"];
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
+    const spam = spamCheck(body);
+    if (spam) return NextResponse.json({ error: spam }, { status: 400 });
+    if (isSignupBurst(await prisma.tenant.count({ where: { createdAt: { gte: burstSince() } } }))) {
+      return NextResponse.json({ error: BURST_MESSAGE }, { status: 429 });
+    }
     const data = registerSchema.parse(body);
 
     const existing = await prisma.user.findUnique({ where: { email: data.email } });
