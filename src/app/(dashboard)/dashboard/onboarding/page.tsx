@@ -55,6 +55,15 @@ export default function OnboardingPage() {
         </div>
         <h1 className="text-2xl font-bold text-foreground">Sistemi Kurmaya Başlayın</h1>
         <p className="text-slate-400">Aşağıdaki adımları tamamlayarak ERP&apos;nizi hazır hale getirin</p>
+        <button
+          onClick={() => {
+            void fetch("/api/tenant/onboarding", { method: "POST" }).then(() => router.push("/dashboard"));
+          }}
+          className="text-sm text-slate-500 underline underline-offset-4 hover:text-foreground"
+        >
+          Şimdilik atla, doğrudan kullanmaya başla
+        </button>
+        <p className="text-xs text-slate-400">Sihirbaza istediğiniz zaman soldaki menüden dönebilirsiniz.</p>
       </div>
 
       <div className="rounded-2xl border border-border bg-white dark:bg-slate-900 p-5">
