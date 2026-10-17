@@ -12,18 +12,34 @@ export default async function DashboardPage() {
 
   let activeModuleCount = 0;
   let tenantName = "ERP Sistemi";
+  let currency = "TRY";
+  let userCount = 0;
+  let notificationCount = 0;
+  let monthRevenue = 0;
 
   let activeOkrPeriod: string | null = null;
   let okrStats = { count: 0, avgProgress: 0 };
 
+  const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+
   if (user.tenantId) {
-    const [modules, tenant, okrPeriod] = await Promise.all([
+    const [modules, tenant, okrPeriod, uCount, notifCount, salesAgg] = await Promise.all([
       getActiveModules(user.tenantId).then((m) => m.length),
-      prisma.tenant.findUnique({ where: { id: user.tenantId }, select: { name: true } }),
-      prisma.okrPeriod.findFirst({ where: { tenantId: user.tenantId, isActive: true, deletedAt: null }, select: { id: true, name: true } })
+      prisma.tenant.findUnique({ where: { id: user.tenantId }, select: { name: true, currency: true } }),
+      prisma.okrPeriod.findFirst({ where: { tenantId: user.tenantId, isActive: true, deletedAt: null }, select: { id: true, name: true } }),
+      prisma.user.count({ where: { tenantId: user.tenantId, deletedAt: null } }),
+      prisma.notification.count({ where: { userId: user.id!, tenantId: user.tenantId, isRead: false } }),
+      prisma.sale.aggregate({
+        where: { tenantId: user.tenantId, deletedAt: null, createdAt: { gte: startOfMonth } },
+        _sum: { totalAmount: true },
+      }),
     ]);
     activeModuleCount = modules;
     tenantName = tenant?.name ?? tenantName;
+    currency = tenant?.currency ?? "TRY";
+    userCount = uCount;
+    notificationCount = notifCount;
+    monthRevenue = salesAgg._sum.totalAmount ?? 0;
 
     if (okrPeriod) {
       activeOkrPeriod = okrPeriod.name;
@@ -39,6 +55,13 @@ export default async function DashboardPage() {
         avgProgress: aggregate._avg.progress ? Math.round(aggregate._avg.progress * 10) / 10 : 0
       };
     }
+  } else {
+    const [uCount, notifCount] = await Promise.all([
+      prisma.user.count({ where: { deletedAt: null } }),
+      user.id ? prisma.notification.count({ where: { userId: user.id, isRead: false } }) : 0,
+    ]);
+    userCount = uCount;
+    notificationCount = notifCount;
   }
 
   const initialLayouts = await prisma.dashboardLayout.findMany({
@@ -48,6 +71,8 @@ export default async function DashboardPage() {
   });
 
   const greeting = getGreeting();
+  const currencySymbol = currency === "USD" ? "$" : currency === "EUR" ? "€" : "₺";
+  const buAyValue = `${currencySymbol}${monthRevenue.toLocaleString("tr-TR")}`;
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
@@ -86,9 +111,9 @@ export default async function DashboardPage() {
       {/* Stats grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard icon="pi-th-large" label="Aktif Modül" value={activeModuleCount} color="var(--color-primary)" />
-        <StatCard icon="pi-users" label="Kullanıcılar" value="—" color="#16a34a" />
-        <StatCard icon="pi-bell" label="Bildirimler" value="—" color="#ea580c" />
-        <StatCard icon="pi-chart-line" label="Bu Ay" value="—" color="#7c3aed" />
+        <StatCard icon="pi-users" label="Kullanıcılar" value={userCount} color="#16a34a" />
+        <StatCard icon="pi-bell" label="Bildirimler" value={notificationCount} color="#ea580c" />
+        <StatCard icon="pi-chart-line" label="Bu Ay" value={buAyValue} color="#7c3aed" />
       </div>
 
       {/* Quick actions */}

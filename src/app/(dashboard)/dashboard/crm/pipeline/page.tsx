@@ -29,12 +29,14 @@ function DraggableCard({ customer }: { customer: PipelineCustomer }) {
     >
       {/* Drag handle row */}
       <div className="flex items-start justify-between gap-2" {...attributes} {...listeners}>
-        <div className="flex items-center gap-2 min-w-0">
-          <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
+        <div className="flex items-start gap-2 min-w-0">
+          <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 mt-0.5"
             style={{ background: stage.color }}>
             {customer.name[0]?.toUpperCase()}
           </div>
-          <p className="font-medium text-foreground text-sm truncate">{customer.name}</p>
+          <p className="font-medium text-foreground text-sm break-words line-clamp-2 leading-snug" title={customer.name}>
+            {customer.name}
+          </p>
         </div>
         <i className="pi pi-ellipsis-h text-slate-300 text-xs shrink-0 mt-1" />
       </div>
@@ -180,7 +182,7 @@ export default function PipelinePage() {
 
       {/* Board */}
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 overflow-x-auto pb-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 overflow-x-auto pb-2">
           {PIPELINE_STAGES.map((stage) => (
             <DroppableColumn
               key={stage.id}

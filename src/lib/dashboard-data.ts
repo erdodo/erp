@@ -230,13 +230,19 @@ export async function groupByData(opts: {
   const results = await model.groupBy({
     by: [opts.groupByField],
     where,
-    _count: { _all: true },
-    orderBy: { _count: { _all: "desc" } },
+    _count: { id: true },
+    orderBy: { _count: { id: "desc" } },
     take: opts.limit ?? 10,
   }) as Array<Record<string, unknown>>;
 
-  return results.map((r) => ({
-    label: String(r[opts.groupByField] ?? "—"),
-    value: (r._count as Record<string, number>)._all ?? 0,
-  }));
+  return results.map((r) => {
+    const countObj = r._count as Record<string, number> | number | undefined;
+    const value = typeof countObj === "number"
+      ? countObj
+      : (countObj?.id ?? countObj?._all ?? (countObj ? Object.values(countObj)[0] : 0) ?? 0);
+    return {
+      label: String(r[opts.groupByField] ?? "—"),
+      value,
+    };
+  });
 }

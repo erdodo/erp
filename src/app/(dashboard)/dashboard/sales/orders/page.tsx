@@ -123,16 +123,16 @@ export default function SalesOrdersPage() {
       <div className="rounded-2xl border border-border bg-white dark:bg-slate-900 overflow-hidden">
         <div className="overflow-x-auto relative">
           {loading && <div className="absolute inset-0 bg-white/50 dark:bg-slate-900/50 z-10 flex items-center justify-center"><i className="pi pi-spin pi-spinner text-2xl" style={{ color: "var(--color-primary)" }} /></div>}
-          <table className="w-full text-sm">
+          <table className="w-full text-sm min-w-[640px]">
             <thead>
               <tr className="border-b border-border bg-slate-50 dark:bg-slate-800/50">
                 <th className="w-10 py-3 px-4"><input type="checkbox" checked={allSel} onChange={() => setSelected(allSel ? new Set() : new Set(orders.map((o) => o.id)))} className="rounded" /></th>
-                <th className="py-3 px-4 text-left font-medium text-slate-500">Sipariş No</th>
-                <th className="py-3 px-4 text-left font-medium text-slate-500 hidden sm:table-cell">Müşteri</th>
-                <th className="py-3 px-4 text-left font-medium text-slate-500">Durum</th>
-                <th className="py-3 px-4 text-right font-medium text-slate-500">Tutar</th>
-                <th className="py-3 px-4 text-left font-medium text-slate-500 hidden lg:table-cell">Tarih</th>
-                <th className="py-3 px-4 text-left font-medium text-slate-500 hidden xl:table-cell">Teslimat</th>
+                <th className="py-3 px-4 text-left font-medium text-slate-500 whitespace-nowrap">Sipariş No</th>
+                <th className="py-3 px-4 text-left font-medium text-slate-500 hidden sm:table-cell whitespace-nowrap">Müşteri</th>
+                <th className="py-3 px-4 text-left font-medium text-slate-500 whitespace-nowrap">Durum</th>
+                <th className="py-3 px-4 text-right font-medium text-slate-500 whitespace-nowrap">Tutar</th>
+                <th className="py-3 px-4 text-left font-medium text-slate-500 hidden lg:table-cell whitespace-nowrap">Tarih</th>
+                <th className="py-3 px-4 text-left font-medium text-slate-500 hidden xl:table-cell whitespace-nowrap">Teslimat</th>
                 <th className="py-3 px-2 w-8" />
               </tr>
             </thead>
@@ -149,17 +149,17 @@ export default function SalesOrdersPage() {
                     onClick={(e) => { if ((e.target as HTMLElement).closest("input,a,button")) return; router.push(`/dashboard/sales/orders/${o.id}`); }}
                     className={`border-b border-border/50 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition cursor-pointer ${selected.has(o.id) ? "bg-blue-50/50 dark:bg-blue-950/10" : ""}`}>
                     <td className="py-3 px-4" onClick={(e) => e.stopPropagation()}><input type="checkbox" checked={selected.has(o.id)} onChange={() => toggleSelect(o.id)} className="rounded" /></td>
-                    <td className="py-3 px-4">
+                    <td className="py-3 px-4 whitespace-nowrap">
                       <Link href={`/dashboard/sales/orders/${o.id}`} onClick={(e) => e.stopPropagation()}
                         className="font-mono font-semibold hover:underline" style={{ color: "var(--color-primary)" }}>{o.saleNo}</Link>
                     </td>
                     <td className="py-3 px-4 text-slate-600 dark:text-slate-400 hidden sm:table-cell">{o.customer?.name ?? <span className="text-slate-300">—</span>}</td>
-                    <td className="py-3 px-4">
+                    <td className="py-3 px-4 whitespace-nowrap">
                       <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${st.bg}`}>
                         <i className={`pi ${st.icon} text-xs`} />{st.label}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-right font-semibold text-foreground">{fmt(o.totalAmount, o.currency)}</td>
+                    <td className="py-3 px-4 text-right font-semibold text-foreground whitespace-nowrap">{fmt(o.totalAmount, o.currency)}</td>
                     <td className="py-3 px-4 text-slate-400 text-xs hidden lg:table-cell">{new Date(o.orderDate).toLocaleDateString("tr-TR")}</td>
                     <td className="py-3 px-4 text-slate-400 text-xs hidden xl:table-cell">{o.deliveryDate ? new Date(o.deliveryDate).toLocaleDateString("tr-TR") : "—"}</td>
                     <td className="py-3 px-2" onClick={(e) => e.stopPropagation()}>
