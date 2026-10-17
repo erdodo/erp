@@ -113,14 +113,14 @@ export default async function SalesDashboardPage() {
           </Link>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-sm min-w-[560px]">
             <thead>
               <tr className="border-b border-border text-left">
-                <th className="pb-2 pr-4 font-medium text-slate-500">Sipariş No</th>
-                <th className="pb-2 pr-4 font-medium text-slate-500 hidden sm:table-cell">Müşteri</th>
-                <th className="pb-2 pr-4 font-medium text-slate-500">Durum</th>
-                <th className="pb-2 pr-4 font-medium text-slate-500 text-right">Tutar</th>
-                <th className="pb-2 font-medium text-slate-500 hidden md:table-cell">Tarih</th>
+                <th className="pb-2 pr-4 font-medium text-slate-500 whitespace-nowrap">Sipariş No</th>
+                <th className="pb-2 pr-4 font-medium text-slate-500 hidden sm:table-cell whitespace-nowrap">Müşteri</th>
+                <th className="pb-2 pr-4 font-medium text-slate-500 whitespace-nowrap">Durum</th>
+                <th className="pb-2 pr-4 font-medium text-slate-500 text-right whitespace-nowrap">Tutar</th>
+                <th className="pb-2 font-medium text-slate-500 hidden md:table-cell whitespace-nowrap">Tarih</th>
               </tr>
             </thead>
             <tbody>
@@ -128,17 +128,17 @@ export default async function SalesDashboardPage() {
                 const st = getOrderStatus(o.status);
                 return (
                   <tr key={o.id} className="border-b border-border/50 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition">
-                    <td className="py-2.5 pr-4">
+                    <td className="py-2.5 pr-4 whitespace-nowrap">
                       <Link href={`/dashboard/sales/orders/${o.id}`} className="font-mono font-medium text-foreground hover:underline"
                         style={{ color: "var(--color-primary)" }}>{o.saleNo}</Link>
                     </td>
                     <td className="py-2.5 pr-4 text-slate-500 hidden sm:table-cell">{o.customer?.name ?? "—"}</td>
-                    <td className="py-2.5 pr-4">
+                    <td className="py-2.5 pr-4 whitespace-nowrap">
                       <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${st.bg}`}>
                         <i className={`pi ${st.icon} text-xs`} />{st.label}
                       </span>
                     </td>
-                    <td className="py-2.5 pr-4 text-right font-medium text-foreground">
+                    <td className="py-2.5 pr-4 text-right font-medium text-foreground whitespace-nowrap">
                       {o.totalAmount.toLocaleString("tr-TR", { minimumFractionDigits: 2 })} {o.currency}
                     </td>
                     <td className="py-2.5 text-slate-400 text-xs hidden md:table-cell">

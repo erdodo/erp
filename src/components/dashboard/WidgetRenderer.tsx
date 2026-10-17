@@ -125,13 +125,152 @@ export function WidgetRenderer({ widget, onDelete, onEdit }: WidgetRendererProps
         ) : widget.type === "chart" ? (
           <ChartContent rows={(data?.rows ?? []) as Array<{ label: string; value: number }>} cfg={cfg} />
         ) : widget.type === "table" ? (
-          <TableContent rows={data?.rows ?? []} cfg={cfg} />
+          <TableContent rows={data?.rows ?? []} cfg={cfg} src={src} />
         ) : widget.type === "list" ? (
           <ListContent rows={data?.rows ?? []} cfg={cfg} />
         ) : null}
       </div>
     </div>
   );
+}
+
+const FIELD_LABELS: Record<string, string> = {
+  id: "ID",
+  title: "Başlık",
+  name: "Ad",
+  status: "Durum",
+  priority: "Öncelik",
+  type: "Tür",
+  category: "Kategori",
+  createdAt: "Oluşturulma",
+  updatedAt: "Güncellenme",
+  dueDate: "Son Tarih",
+  startDate: "Başlangıç",
+  endDate: "Bitiş",
+  email: "E-posta",
+  phone: "Telefon",
+  city: "Şehir",
+  sku: "SKU",
+  quantity: "Miktar",
+  unit: "Birim",
+  price: "Fiyat",
+  cost: "Maliyet",
+  totalAmount: "Toplam Tutar",
+  amount: "Tutar",
+  currency: "Para Birimi",
+  isActive: "Aktif",
+  isRead: "Okundu",
+  action: "İşlem",
+  module: "Modül",
+  userId: "Kullanıcı",
+  description: "Açıklama",
+  stage: "Aşama",
+  pipelineStage: "Aşama",
+  orderDate: "Sipariş Tarihi",
+  saleNo: "Sipariş No",
+  assignedTo: "Atanan",
+  createdBy: "Oluşturan",
+  progress: "İlerleme",
+  role: "Rol",
+  tags: "Etiketler",
+};
+
+const VALUE_LABELS: Record<string, string> = {
+  in_progress: "Devam Ediyor",
+  todo: "Yapılacak",
+  done: "Tamamlandı",
+  review: "İnceleme",
+  cancelled: "İptal Edildi",
+  canceled: "İptal Edildi",
+  planning: "Planlama",
+  active: "Aktif",
+  inactive: "Pasif",
+  on_hold: "Beklemede",
+  paused: "Duraklatıldı",
+  completed: "Tamamlandı",
+  pending: "Beklemede",
+  pending_approval: "Onay Bekliyor",
+  approved: "Onaylandı",
+  rejected: "Reddedildi",
+  draft: "Taslak",
+  open: "Açık",
+  closed: "Kapalı",
+  delivered: "Teslim Edildi",
+  invoiced: "Faturalandı",
+  shipped: "Kargolandı",
+  low: "Düşük",
+  medium: "Orta",
+  high: "Yüksek",
+  urgent: "Acil",
+  critical: "Kritik",
+  lead: "Aday",
+  prospect: "Görüşme",
+  proposal: "Teklif",
+  negotiation: "Müzakere",
+  won: "Kazanıldı",
+  lost: "Kaybedildi",
+  corporate: "Kurumsal",
+  individual: "Bireysel",
+  epic: "Epic",
+  story: "Hikaye",
+  task: "Görev",
+  bug: "Hata",
+  subtask: "Alt Görev",
+};
+
+function getFieldLabel(col: string, src?: { fields: Array<{ name: string; label: string }> }): string {
+  const fromSrc = src?.fields.find((f) => f.name === col)?.label;
+  if (fromSrc) return fromSrc;
+  if (FIELD_LABELS[col]) return FIELD_LABELS[col];
+  return col.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase()).trim();
+}
+
+function formatWidgetValue(val: unknown): string {
+  if (val === null || val === undefined || val === "") return "—";
+
+  if (typeof val === "boolean") {
+    return val ? "Evet" : "Hayır";
+  }
+
+  if (typeof val === "number") {
+    return val.toLocaleString("tr-TR");
+  }
+
+  if (val instanceof Date) {
+    return val.toLocaleDateString("tr-TR");
+  }
+
+  if (typeof val === "string") {
+    const lower = val.toLowerCase();
+    if (VALUE_LABELS[lower]) {
+      return VALUE_LABELS[lower];
+    }
+
+    const isoDateRegex = /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}:?\d{2})?)?$/;
+    if (isoDateRegex.test(val)) {
+      const d = new Date(val);
+      if (!isNaN(d.getTime())) {
+        if (val.includes("T")) {
+          const hasTime = d.getUTCHours() !== 0 || d.getUTCMinutes() !== 0;
+          return hasTime
+            ? d.toLocaleDateString("tr-TR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })
+            : d.toLocaleDateString("tr-TR", { day: "2-digit", month: "2-digit", year: "numeric" });
+        }
+        return d.toLocaleDateString("tr-TR", { day: "2-digit", month: "2-digit", year: "numeric" });
+      }
+    }
+
+    return val;
+  }
+
+  if (typeof val === "object") {
+    const obj = val as Record<string, unknown>;
+    if (obj.name) return String(obj.name);
+    if (obj.title) return String(obj.title);
+    return JSON.stringify(val);
+  }
+
+  return String(val);
 }
 
 // ─── Stat ──────────────────────────────────────────────────────────────────────
@@ -154,7 +293,7 @@ function StatContent({ value, cfg }: { value: number; cfg: WidgetConfig }) {
 // ─── Chart ─────────────────────────────────────────────────────────────────────
 function ChartContent({ rows, cfg }: { rows: Array<{ label: string; value: number }>; cfg: WidgetConfig }) {
   if (!rows.length) return <EmptyState />;
-  const labels = rows.map((r) => r.label);
+  const labels = rows.map((r) => formatWidgetValue(r.label));
   const values = rows.map((r) => r.value);
   const datasets = [{ data: values, backgroundColor: CHART_COLORS, borderColor: CHART_COLORS, borderWidth: 1.5, borderRadius: 4 }];
   const chartData = { labels, datasets };
@@ -167,7 +306,7 @@ function ChartContent({ rows, cfg }: { rows: Array<{ label: string; value: numbe
 }
 
 // ─── Table ─────────────────────────────────────────────────────────────────────
-function TableContent({ rows, cfg }: { rows: Record<string, unknown>[]; cfg: WidgetConfig }) {
+function TableContent({ rows, cfg, src }: { rows: Record<string, unknown>[]; cfg: WidgetConfig; src?: { fields: Array<{ name: string; label: string }> } }) {
   if (!rows.length) return <EmptyState />;
   const cols = cfg.columns ?? Object.keys(rows[0] ?? {}).filter((k) => k !== "id").slice(0, 5);
   return (
@@ -175,15 +314,19 @@ function TableContent({ rows, cfg }: { rows: Record<string, unknown>[]; cfg: Wid
       <table className="w-full text-xs border-collapse">
         <thead>
           <tr>
-            {cols.map((c) => <th key={c} className="text-left px-2 py-1.5 text-slate-500 font-medium border-b border-border sticky top-0 bg-white dark:bg-slate-900 whitespace-nowrap">{c}</th>)}
+            {cols.map((c) => (
+              <th key={c} className="text-left px-2 py-1.5 text-slate-500 font-medium border-b border-border sticky top-0 bg-white dark:bg-slate-900 whitespace-nowrap">
+                {getFieldLabel(c, src)}
+              </th>
+            ))}
           </tr>
         </thead>
         <tbody>
           {rows.map((row, i) => (
             <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
               {cols.map((c) => (
-                <td key={c} className="px-2 py-1.5 border-b border-border/50 text-foreground truncate max-w-32">
-                  {String(row[c] ?? "—")}
+                <td key={c} className="px-2 py-1.5 border-b border-border/50 text-foreground truncate max-w-32" title={formatWidgetValue(row[c])}>
+                  {formatWidgetValue(row[c])}
                 </td>
               ))}
             </tr>
@@ -203,8 +346,8 @@ function ListContent({ rows, cfg }: { rows: Record<string, unknown>[]; cfg: Widg
     <div className="space-y-1 overflow-auto h-full">
       {rows.map((row, i) => (
         <div key={i} className="flex items-center justify-between gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50">
-          <span className="text-sm text-foreground truncate">{String(row[primary] ?? "—")}</span>
-          {rest[0] && <span className="text-xs text-slate-400 shrink-0 truncate max-w-20">{String(row[rest[0]] ?? "")}</span>}
+          <span className="text-sm text-foreground truncate">{formatWidgetValue(row[primary])}</span>
+          {rest[0] && <span className="text-xs text-slate-400 shrink-0 truncate max-w-20">{formatWidgetValue(row[rest[0]])}</span>}
         </div>
       ))}
     </div>
