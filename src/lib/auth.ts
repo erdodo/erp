@@ -28,6 +28,10 @@ declare module "next-auth" {
   }
 }
 
+import { createFailureLimiter } from "./rate-limit";
+
+const loginLimiter = createFailureLimiter(5, 15 * 60 * 1000, "rl:login");
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET ?? "development-secret",
   session: { strategy: "jwt" },
@@ -55,18 +59,25 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
 
+        const email = (credentials.email as string).toLowerCase().trim();
+        if (await loginLimiter.isLimited(email)) {
+          console.warn(`[AUTH] Cok fazla basarisiz giris denemesi: ${email}`);
+          return null;
+        }
+
         try {
           const { prisma } = await import("./prisma");
           const { compare } = await import("bcryptjs");
 
           const user = await prisma.user.findUnique({
-            where: { email: credentials.email as string },
+            where: { email },
             include: {
               role: { include: { permissions: { include: { permission: true } } } },
             },
           });
 
           if (!user || !user.password) {
+            await loginLimiter.recordFailure(email);
             console.error("[AUTH] User not found or no password");
             return null;
           }
@@ -77,9 +88,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           );
 
           if (!isValid) {
+            await loginLimiter.recordFailure(email);
             console.error("[AUTH] Invalid password");
             return null;
           }
+
+          await loginLimiter.reset(email);
 
           const permissions = user.isSuperAdmin
             ? ["*:*"]

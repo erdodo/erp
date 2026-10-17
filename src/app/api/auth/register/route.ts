@@ -3,6 +3,9 @@ import { prisma } from "@/lib/prisma";
 import { hash } from "bcryptjs";
 import { z } from "zod";
 import { BURST_MESSAGE, burstSince, isSignupBurst, spamCheck } from "@/lib/antispam";
+import { createRateLimiter, getClientIp } from "@/lib/rate-limit";
+
+const registerLimiter = createRateLimiter(10, 10 * 60 * 1000, "rl:register");
 
 const registerSchema = z.object({
   name: z.string().min(2).max(100),
@@ -26,6 +29,16 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const spam = spamCheck(body);
     if (spam) return NextResponse.json({ error: spam }, { status: 400 });
+
+    const clientIp = getClientIp(req);
+    const limitResult = await registerLimiter.check(clientIp);
+    if (!limitResult.allowed) {
+      return NextResponse.json(
+        { error: BURST_MESSAGE },
+        { status: 429, headers: { "Retry-After": String(limitResult.retryAfter) } }
+      );
+    }
+
     if (isSignupBurst(await prisma.tenant.count({ where: { createdAt: { gte: burstSince() } } }))) {
       return NextResponse.json({ error: BURST_MESSAGE }, { status: 429 });
     }
