@@ -1,0 +1,47 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://erp_user:${POSTGRES_PASSWORD:-erp_secure_password}@db:5432/erp_db?schema=public
+      - AUTH_SECRET=${AUTH_SECRET:-change-this-in-production-min-32-chars}
+      - NEXTAUTH_SECRET=${AUTH_SECRET:-change-this-in-production-min-32-chars}
+      - NEXTAUTH_URL=${NEXTAUTH_URL:-http://localhost:3000}
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=erp_user
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-erp_secure_password}
+      - POSTGRES_DB=erp_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U erp_user -d erp_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+
+volumes:
+  postgres_data:
+  redis_data:

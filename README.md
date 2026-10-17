@@ -1,36 +1,72 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Dodo Labs ERP
 
-## Getting Started
+Modern, modüler ve çok kiracılı (multi-tenant) kurumsal kaynak planlama (ERP) platformu.
 
-First, run the development server:
+## Hızlı Başlangıç
 
 ```bash
+# Bağımlılıkları yükleyin
+npm install
+
+# Ortam değişkenlerini hazırlayın
+cp .env.example .env
+
+# Veritabanı şemasını uygulayın
+npx prisma generate
+npx prisma db push
+
+# Geliştirme sunucusunu başlatın
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+[http://localhost:3000](http://localhost:3000) adresinden erişebilirsiniz.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Dağıtık Hız Sınırlama (Shared Rate Limiting) & Redis
 
-## Learn More
+Sistemde oturum açma, kayıt olma ve hassas API uç noktalarında kaba kuvvet (brute-force) ve spam saldırılarına karşı hız sınırlama mekanizması bulunur:
 
-To learn more about Next.js, take a look at the following resources:
+- `REDIS_URL` tanımlandığında: Dağıtık ortamda (`ioredis` üzerinden atomik `INCR + EXPIRE` Lua scripti ile) tüm sunucu/container örnekleri arasında paylaşımlı olarak çalışır.
+- `REDIS_URL` tanımlı olmadığında veya Redis geçici olarak çöktüğünde: Sistem kesintiye uğramaz; bir uyarı satırı loglayarak (`[RateLimit] ...`) otomatik olarak bellek-içi (in-memory sliding window) korumaya döner (fail-open).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Ortam Değişkeni
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+REDIS_URL="redis://localhost:6379"
+# Parolalı örnek:
+# REDIS_URL="redis://:supersecret@redis-service:6379/0"
+```
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Docker & Coolify Kurulumu
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Docker Compose ile Çalıştırma
+
+Projeyi Postgres ve Redis ile birlikte ayağa kaldırmak için:
+
+```bash
+docker compose up -d
+```
+
+### Coolify Notları
+
+1. **Redis Servisi Ekleme:**
+   - Coolify kontrol panelinde projenize **Service -> Redis** ekleyin (veya Docker Compose şablonunu kullanın).
+   - Redis portunu dahili ağda (internal network) 6379 olarak bırakın.
+2. **Uygulama Ortam Değişkenleri:**
+   - Uygulama ayarlarında `REDIS_URL` değişkenine Coolify dahili servis adresini verin:
+     `REDIS_URL=redis://<redis-service-name>:6379` (ör. `redis://redis:6379`).
+3. **Sağlık Kontrolü & Süreklilik:**
+   - Redis kapalı olsa dahi uygulama bellek-içi koruma ile çalışmaya devam eder (fail-open).
+
+---
+
+## Testler
+
+Birim ve hız sınırlayıcı testlerini çalıştırmak için:
+
+```bash
+npm test
+```
